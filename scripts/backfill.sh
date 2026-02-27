@@ -42,5 +42,21 @@ cryo logs --rpc "$RPC_URL" --contract 0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2
 echo "=== Extracting Aave V3 LiquidationCall events ==="
 cryo logs --rpc "$RPC_URL" --contract 0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2 --topic0 0xe413a321e8681d831f4dbccbca790d2952b56f977908e45be37335533e005286 --blocks 16291127:latest --chunk-size 10000 --output-dir "$DATA_DIR/aave_v3_liquidation"
 
+# Compound V3 (cUSDCv3) — Supply events
+# Contract: 0xc3d688B66703497DAA19211EEdff47f25384cdc3
+# Topic0 (Supply): 0xd1cf3d156d5f8f0d50f6c122ed609cec09d35c9b9fb3fff6ea0959134dae424e
+echo "=== Extracting Compound V3 Supply events ==="
+cryo logs --rpc "$RPC_URL" --contract 0xc3d688B66703497DAA19211EEdff47f25384cdc3 --topic0 0xd1cf3d156d5f8f0d50f6c122ed609cec09d35c9b9fb3fff6ea0959134dae424e --blocks 15331586:latest --chunk-size 10000 --output-dir "$DATA_DIR/compound_v3_supply"
+
+# Compound V3 — Withdraw events
+# Topic0 (Withdraw): 0x9b1bfa7fa9ee420a16e124f794c35ac9f90472acc99140eb2f6447c714cad8eb
+echo "=== Extracting Compound V3 Withdraw events ==="
+cryo logs --rpc "$RPC_URL" --contract 0xc3d688B66703497DAA19211EEdff47f25384cdc3 --topic0 0x9b1bfa7fa9ee420a16e124f794c35ac9f90472acc99140eb2f6447c714cad8eb --blocks 15331586:latest --chunk-size 10000 --output-dir "$DATA_DIR/compound_v3_withdraw"
+
+# Compound V3 — AbsorbDebt events
+# Topic0 (AbsorbDebt): 0x1547a878dc89ad3c89a844c75c4f1332baef25e97f631a37cf2e3e9adaedb684
+echo "=== Extracting Compound V3 AbsorbDebt events ==="
+cryo logs --rpc "$RPC_URL" --contract 0xc3d688B66703497DAA19211EEdff47f25384cdc3 --topic0 0x1547a878dc89ad3c89a844c75c4f1332baef25e97f631a37cf2e3e9adaedb684 --blocks 15331586:latest --chunk-size 10000 --output-dir "$DATA_DIR/compound_v3_absorb"
+
 echo "=== Done ==="
 echo "Run scripts/load_parquet.sh to load into PostgreSQL."

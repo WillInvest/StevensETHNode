@@ -24,3 +24,7 @@ ON CONFLICT (name) DO NOTHING;
 INSERT INTO _meta_protocols (name, description, start_block)
 VALUES ('aave_v3', 'Aave V3 Lending — Supply, Borrow, Repay, Liquidation', 16291127)
 ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO _meta_protocols (name, description, start_block)
+VALUES ('compound_v3', 'Compound V3 (Comet) — Supply, Withdraw, AbsorbDebt', 15331586)
+ON CONFLICT (name) DO NOTHING;

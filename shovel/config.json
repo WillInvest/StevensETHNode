@@ -201,6 +201,101 @@
           {"address": ["0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"]}
         ]
       }
+    },
+    {
+      "name": "compound_v3_supply",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 15331586}],
+      "table": {
+        "name": "compound_v3_supply",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "from_addr", "type": "bytea"},
+          {"name": "dst", "type": "bytea"},
+          {"name": "amount", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "Supply",
+        "type": "event Supply(address indexed from, address indexed dst, uint256 amount)",
+        "inputs": [
+          {"name": "from", "column": "from_addr"},
+          {"name": "dst", "column": "dst"},
+          {"name": "amount", "column": "amount"}
+        ],
+        "sources": [
+          {"address": ["0xc3d688B66703497DAA19211EEdff47f25384cdc3"]}
+        ]
+      }
+    },
+    {
+      "name": "compound_v3_withdraw",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 15331586}],
+      "table": {
+        "name": "compound_v3_withdraw",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "src", "type": "bytea"},
+          {"name": "to_addr", "type": "bytea"},
+          {"name": "amount", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "Withdraw",
+        "type": "event Withdraw(address indexed src, address indexed to, uint256 amount)",
+        "inputs": [
+          {"name": "src", "column": "src"},
+          {"name": "to", "column": "to_addr"},
+          {"name": "amount", "column": "amount"}
+        ],
+        "sources": [
+          {"address": ["0xc3d688B66703497DAA19211EEdff47f25384cdc3"]}
+        ]
+      }
+    },
+    {
+      "name": "compound_v3_absorb",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 15331586}],
+      "table": {
+        "name": "compound_v3_absorb",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "absorber", "type": "bytea"},
+          {"name": "borrower", "type": "bytea"},
+          {"name": "base_paid", "type": "numeric"},
+          {"name": "usd_value", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "AbsorbDebt",
+        "type": "event AbsorbDebt(address indexed absorber, address indexed borrower, uint256 basePaidOut, uint256 usdValue)",
+        "inputs": [
+          {"name": "absorber", "column": "absorber"},
+          {"name": "borrower", "column": "borrower"},
+          {"name": "basePaidOut", "column": "base_paid"},
+          {"name": "usdValue", "column": "usd_value"}
+        ],
+        "sources": [
+          {"address": ["0xc3d688B66703497DAA19211EEdff47f25384cdc3"]}
+        ]
+      }
     }
   ]
 }
