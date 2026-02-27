@@ -5,6 +5,7 @@ import Data from "./pages/Data";
 import Browse from "./pages/Browse";
 import Extraction from "./pages/Extraction";
 import Mempool from "./pages/Mempool";
+import Query from "./pages/Query";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/browse/:schema/:table" element={<Browse />} />
         <Route path="/extraction" element={<Extraction />} />
         <Route path="/mempool" element={<Mempool />} />
+        <Route path="/query" element={<Query />} />
       </Route>
     </Routes>
   );
