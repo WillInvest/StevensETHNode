@@ -11,6 +11,8 @@ from web.extraction import (
     DEFAULT_CHUNK_SIZE,
     get_chain_head,
     start_extraction,
+    pause_extraction,
+    resume_extraction,
     get_job_progress,
     get_all_jobs,
     _jobs,
@@ -54,6 +56,26 @@ async def start_job(req: StartRequest):
     except ValueError as e:
         raise HTTPException(400, str(e))
     return get_job_progress(job)
+
+
+class JobActionRequest(BaseModel):
+    job_id: str
+
+
+@router.post("/extraction/pause")
+async def pause_job(req: JobActionRequest):
+    """Pause a running extraction job."""
+    if not pause_extraction(req.job_id):
+        raise HTTPException(400, "Cannot pause: job not running or not found")
+    return {"status": "paused", "job_id": req.job_id}
+
+
+@router.post("/extraction/resume")
+async def resume_job(req: JobActionRequest):
+    """Resume a paused extraction job."""
+    if not resume_extraction(req.job_id):
+        raise HTTPException(400, "Cannot resume: job not paused or not found")
+    return {"status": "running", "job_id": req.job_id}
 
 
 @router.get("/extraction/jobs")

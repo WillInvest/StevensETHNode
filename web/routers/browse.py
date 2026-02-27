@@ -20,6 +20,8 @@ async def browse_table(
     table: str,
     limit: int = Query(50, ge=1, le=1000),
     offset: int = Query(0, ge=0),
+    sort_by: str = Query(None),
+    sort_dir: str = Query("desc"),
 ):
     """Paginated rows from any table. Table name is validated to prevent injection."""
     schema = _validate_name(schema, "schema")
@@ -62,8 +64,18 @@ async def browse_table(
                 col_exprs.append(f'"{name}"')
         select = ", ".join(col_exprs)
 
+        # Optional sorting
+        order_clause = ""
+        if sort_by:
+            sort_by = _validate_name(sort_by, "sort column")
+            col_names = {c["name"] for c in columns}
+            if sort_by not in col_names:
+                raise HTTPException(400, f"Column {sort_by} not found")
+            direction = "ASC" if sort_dir.lower() == "asc" else "DESC"
+            order_clause = f' ORDER BY "{sort_by}" {direction}'
+
         data_query = await conn.execute(
-            f'SELECT {select} FROM "{schema}"."{table}" LIMIT %s OFFSET %s',
+            f'SELECT {select} FROM "{schema}"."{table}"{order_clause} LIMIT %s OFFSET %s',
             (limit, offset),
         )
         rows = [

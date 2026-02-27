@@ -1,97 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import useSSE from "../useSSE";
 
-const styles = {
-  heading: { marginBottom: "8px" },
-  subtitle: { color: "#666", marginBottom: "24px", fontSize: "14px" },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "20px",
-  },
-  card: {
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-    padding: "20px",
-    background: "#fafafa",
-  },
-  cardTitle: { fontSize: "18px", fontWeight: 600, marginBottom: "4px" },
-  contract: {
-    fontFamily: "monospace",
-    fontSize: "12px",
-    color: "#888",
-    marginBottom: "12px",
-    wordBreak: "break-all",
-  },
-  meta: { fontSize: "13px", color: "#666", marginBottom: "16px" },
-  btn: {
-    padding: "8px 20px",
-    border: "none",
-    borderRadius: "4px",
-    background: "#2563eb",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: 500,
-  },
-  btnDisabled: {
-    padding: "8px 20px",
-    border: "none",
-    borderRadius: "4px",
-    background: "#a0a0c0",
-    color: "#fff",
-    cursor: "not-allowed",
-    fontSize: "14px",
-    fontWeight: 500,
-  },
-  progressBar: {
-    height: "20px",
-    background: "#e0e0e0",
-    borderRadius: "10px",
-    overflow: "hidden",
-    marginBottom: "8px",
-  },
-  stat: { fontSize: "13px", color: "#444", marginBottom: "4px" },
-  error: { color: "red", fontSize: "13px" },
-  connDot: (ok) => ({
-    display: "inline-block",
-    width: "8px",
-    height: "8px",
-    borderRadius: "50%",
-    background: ok ? "#22c55e" : "#ef4444",
-    marginRight: "6px",
-  }),
-};
-
-function progressFill(pct) {
-  return {
-    height: "100%",
-    width: `${Math.min(pct, 100)}%`,
-    background: pct >= 100 ? "#22c55e" : "#2563eb",
-    borderRadius: "10px",
-    transition: "width 0.5s ease",
-  };
-}
-
-function badge(status) {
-  const colors = {
-    running: { bg: "#dbeafe", fg: "#1d4ed8" },
-    completed: { bg: "#dcfce7", fg: "#166534" },
-    failed: { bg: "#fee2e2", fg: "#991b1b" },
-    pending: { bg: "#f3f4f6", fg: "#666" },
-  };
-  const c = colors[status] || colors.pending;
-  return {
-    display: "inline-block",
-    padding: "2px 10px",
-    borderRadius: "12px",
-    fontSize: "12px",
-    fontWeight: 600,
-    background: c.bg,
-    color: c.fg,
-  };
-}
-
 function formatDuration(seconds) {
   if (seconds == null) return "--";
   const h = Math.floor(seconds / 3600);
@@ -110,6 +19,7 @@ export default function Extraction() {
   const [pools, setPools] = useState([]);
   const [loadError, setLoadError] = useState(null);
   const [starting, setStarting] = useState(null);
+  const [toggling, setToggling] = useState(null);
 
   const { data: sseData, connected } = useSSE("/api/extraction/stream");
 
@@ -152,77 +62,149 @@ export default function Extraction() {
     }
   };
 
+  const handlePauseResume = async (jobId, action) => {
+    setToggling(jobId);
+    try {
+      const resp = await fetch(`/api/extraction/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ job_id: jobId }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json();
+        alert(err.detail || `Failed to ${action}`);
+      }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setToggling(null);
+    }
+  };
+
   return (
-    <div>
-      <h2 style={styles.heading}>Cryo Extraction Dashboard</h2>
-      <p style={styles.subtitle}>
-        <span style={styles.connDot(connected)} />
-        {connected ? "Live updates connected" : "Connecting..."}
-        {pools.length > 0 && (
-          <span>
-            {" "}
-            &middot; Chain head: {formatNum(pools[0]?.chain_head)}
-          </span>
-        )}
-      </p>
+    <div className="fade-in-up">
+      <div style={{ marginBottom: 28 }}>
+        <h2 style={{ fontSize: 26, fontWeight: 700, marginBottom: 6 }}>
+          Cryo Extraction
+        </h2>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
+          <span className={`status-dot ${connected ? "connected" : "disconnected"}`} />
+          {connected ? "Live updates connected" : "Connecting..."}
+          {pools.length > 0 && (
+            <span>
+              {" \u00b7 "}Chain head: <span className="num">{formatNum(pools[0]?.chain_head)}</span>
+            </span>
+          )}
+        </p>
+      </div>
 
-      {loadError && <p style={styles.error}>Error loading pools: {loadError}</p>}
+      {loadError && (
+        <div style={{ color: "var(--red)", marginBottom: 16 }}>
+          Error loading pools: {loadError}
+        </div>
+      )}
 
-      <div style={styles.grid}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         {pools.map((pool) => {
           const job = jobForPool(pool.pool_id);
           const isRunning = job?.status === "running";
-          const canStart = !isRunning && starting !== pool.pool_id;
+          const isPaused = job?.status === "paused";
+          const isActive = isRunning || isPaused;
+          const canStart = !isActive && starting !== pool.pool_id;
 
           return (
-            <div key={pool.pool_id} style={styles.card}>
-              <div style={styles.cardTitle}>{pool.label}</div>
-              <div style={styles.contract}>{pool.contract}</div>
-              <div style={styles.meta}>
-                Deploy block: {formatNum(pool.deploy_block)} | Total blocks:{" "}
-                {formatNum(pool.total_blocks)}
+            <div key={pool.pool_id} className="card">
+              <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 4 }}>
+                {pool.label}
+              </div>
+              <div className="mono" style={{
+                fontSize: 11,
+                color: "var(--text-muted)",
+                marginBottom: 12,
+                wordBreak: "break-all",
+              }}>
+                {pool.contract}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 16 }}>
+                Deploy block: <span className="num">{formatNum(pool.deploy_block)}</span>
+                {" | "}
+                Total blocks: <span className="num">{formatNum(pool.total_blocks)}</span>
               </div>
 
-              <button
-                style={canStart ? styles.btn : styles.btnDisabled}
-                disabled={!canStart}
-                onClick={() => handleStart(pool.pool_id)}
-              >
-                {starting === pool.pool_id
-                  ? "Starting..."
-                  : isRunning
-                  ? "Running..."
-                  : "Start Extraction"}
-              </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                {!isActive && (
+                  <button
+                    className={`btn ${canStart ? "btn-primary" : ""}`}
+                    disabled={!canStart}
+                    onClick={() => handleStart(pool.pool_id)}
+                    style={!canStart ? { background: "var(--text-muted)", cursor: "not-allowed", color: "#fff" } : {}}
+                  >
+                    {starting === pool.pool_id ? "Starting..." : "Start Extraction"}
+                  </button>
+                )}
+                {isRunning && job && (
+                  <button
+                    className="btn"
+                    disabled={toggling === job.job_id}
+                    onClick={() => handlePauseResume(job.job_id, "pause")}
+                    style={{
+                      background: "var(--amber)",
+                      color: "#000",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {toggling === job.job_id ? "Pausing..." : "Pause"}
+                  </button>
+                )}
+                {isPaused && job && (
+                  <button
+                    className="btn btn-primary"
+                    disabled={toggling === job.job_id}
+                    onClick={() => handlePauseResume(job.job_id, "resume")}
+                  >
+                    {toggling === job.job_id ? "Resuming..." : "Resume"}
+                  </button>
+                )}
+              </div>
 
               {job && (
-                <div style={{ marginTop: "16px" }}>
-                  <div style={{ marginBottom: "6px" }}>
-                    <span style={badge(job.status)}>{job.status}</span>
+                <div style={{ marginTop: 16 }} className="fade-in">
+                  <div style={{ marginBottom: 8 }}>
+                    <span className={`badge badge-${job.status}`}>
+                      {job.status}
+                    </span>
                   </div>
-                  <div style={styles.progressBar}>
-                    <div style={progressFill(job.percent)} />
+                  <div className="progress-bar" style={{ marginBottom: 10 }}>
+                    <div
+                      className={`progress-fill ${job.percent >= 100 ? "done" : ""}`}
+                      style={{
+                        width: `${Math.min(job.percent, 100)}%`,
+                        ...(isPaused ? { background: "var(--amber)" } : {}),
+                      }}
+                    />
                   </div>
-                  <div style={styles.stat}>
-                    <strong>{job.percent}%</strong> &mdash;{" "}
-                    {formatNum(job.completed_chunks)} /{" "}
-                    {formatNum(job.expected_chunks)} chunks
+                  <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 4 }}>
+                    <strong style={{ color: "var(--text-primary)" }}>{job.percent}%</strong>
+                    {" \u2014 "}
+                    <span className="num">{formatNum(job.completed_chunks)}</span>
+                    {" / "}
+                    <span className="num">{formatNum(job.expected_chunks)}</span> chunks
                   </div>
-                  <div style={styles.stat}>
-                    {formatNum(job.completed_blocks)} /{" "}
-                    {formatNum(job.total_blocks)} blocks
+                  <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 4 }}>
+                    <span className="num">{formatNum(job.completed_blocks)}</span>
+                    {" / "}
+                    <span className="num">{formatNum(job.total_blocks)}</span> blocks
                   </div>
-                  <div style={styles.stat}>
+                  <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>
                     Elapsed: {formatDuration(job.elapsed_seconds)}
                     {job.eta_seconds != null && (
                       <>
-                        {" "}
-                        | ETA: ~{formatDuration(job.eta_seconds)} remaining
+                        {" | "}ETA: ~{formatDuration(job.eta_seconds)} remaining
                       </>
                     )}
                   </div>
                   {job.error_message && (
-                    <div style={{ ...styles.error, marginTop: "8px" }}>
+                    <div style={{ color: "var(--red)", fontSize: 13, marginTop: 8 }}>
                       {job.error_message}
                     </div>
                   )}

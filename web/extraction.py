@@ -3,6 +3,7 @@ import glob as globmod
 import json
 import math
 import os
+import signal
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -39,6 +40,7 @@ CRYO_BIN = os.path.expanduser("~/.cargo/bin/cryo")
 class JobStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"
+    PAUSED = "paused"
     COMPLETED = "completed"
     FAILED = "failed"
 
@@ -201,6 +203,32 @@ async def start_extraction(
     return job
 
 
+def pause_extraction(job_id: str) -> bool:
+    """Pause a running extraction by sending SIGSTOP to the subprocess."""
+    job = _jobs.get(job_id)
+    if not job or job.status != JobStatus.RUNNING or not job.pid:
+        return False
+    try:
+        os.kill(job.pid, signal.SIGSTOP)
+        job.status = JobStatus.PAUSED
+        return True
+    except OSError:
+        return False
+
+
+def resume_extraction(job_id: str) -> bool:
+    """Resume a paused extraction by sending SIGCONT to the subprocess."""
+    job = _jobs.get(job_id)
+    if not job or job.status != JobStatus.PAUSED or not job.pid:
+        return False
+    try:
+        os.kill(job.pid, signal.SIGCONT)
+        job.status = JobStatus.RUNNING
+        return True
+    except OSError:
+        return False
+
+
 async def _wait_for_job(job: ExtractionJob, process: asyncio.subprocess.Process):
     """Wait for Cryo subprocess to finish and update job status."""
     try:
@@ -208,7 +236,8 @@ async def _wait_for_job(job: ExtractionJob, process: asyncio.subprocess.Process)
         if process.returncode == 0:
             job.status = JobStatus.COMPLETED
         else:
-            job.status = JobStatus.FAILED
+            if job.status != JobStatus.PAUSED:
+                job.status = JobStatus.FAILED
             # Cryo may write errors to stdout or stderr
             err_text = stderr.decode("utf-8", errors="replace")
             out_text = stdout.decode("utf-8", errors="replace")

@@ -53,3 +53,14 @@ bash scripts/load_parquet.sh
 - Python: FastAPI with async, type hints, psycopg for PostgreSQL
 - JavaScript: React functional components, hooks, minimal dependencies
 - SQL: Lowercase keywords, snake_case table/column names
+
+## Agent & MCP Reference
+- See `.claude/docs/mcp-and-tools-reference.md` for full MCP server catalog, Erigon API reference, and recommended architecture
+- MCP servers are declared in config (not downloaded) — they are pulled via `npx` on demand
+- Priority MCPs: evm-mcp (Erigon RPC), postgres-mcp (database), Context7 (live docs), @antv/mcp-server-chart (visualization)
+
+## Workflow
+- Always use plan mode (`Shift+Tab`) before multi-file or architectural changes
+- Use subagents for isolated tasks (security review, test running, research)
+- Use `/compact` between unrelated tasks to keep context clean
+- Check `.claude/rules/` for file-type-specific conventions

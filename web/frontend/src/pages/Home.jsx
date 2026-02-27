@@ -1,32 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-const styles = {
-  heading: { marginBottom: "8px" },
-  subtitle: { color: "#666", marginBottom: "24px" },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    fontSize: "14px",
-  },
-  th: {
-    textAlign: "left",
-    padding: "10px 12px",
-    borderBottom: "2px solid #e0e0e0",
-    fontWeight: 600,
-  },
-  td: {
-    padding: "10px 12px",
-    borderBottom: "1px solid #f0f0f0",
-  },
-  link: {
-    color: "#2563eb",
-    textDecoration: "none",
-  },
-  error: { color: "red" },
-  loading: { color: "#888" },
-};
-
 export default function Home() {
   const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,43 +20,93 @@ export default function Home() {
   const totalRows = tables.reduce((sum, t) => sum + (t.row_count || 0), 0);
 
   return (
-    <div>
-      <h2 style={styles.heading}>Database Overview</h2>
-      <p style={styles.subtitle}>
-        {tables.length} tables, {totalRows.toLocaleString()} total rows
-      </p>
+    <div className="fade-in-up">
+      <div style={{ marginBottom: 28 }}>
+        <h2 style={{ fontSize: 26, fontWeight: 700, marginBottom: 6 }}>
+          Database Overview
+        </h2>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
+          {loading ? "Loading..." : (
+            <>
+              <span className="num">{tables.length}</span> tables
+              {" \u00b7 "}
+              <span className="num">{totalRows.toLocaleString()}</span> total rows
+            </>
+          )}
+        </p>
+      </div>
 
-      {loading && <p style={styles.loading}>Loading tables...</p>}
-      {error && <p style={styles.error}>Error: {error}</p>}
+      {error && (
+        <div style={{ color: "var(--red)", marginBottom: 16 }}>Error: {error}</div>
+      )}
 
+      {/* Stats cards */}
       {!loading && !error && (
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Schema</th>
-              <th style={styles.th}>Table</th>
-              <th style={styles.th}>Rows</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tables.map((t) => (
-              <tr key={`${t.schema}.${t.table}`}>
-                <td style={styles.td}>{t.schema}</td>
-                <td style={styles.td}>
-                  <Link
-                    to={`/browse/${t.schema}/${t.table}`}
-                    style={styles.link}
-                  >
-                    {t.table}
-                  </Link>
-                </td>
-                <td style={styles.td}>
-                  {t.row_count != null ? t.row_count.toLocaleString() : "—"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 14,
+            marginBottom: 28,
+          }}>
+            <div className="card" style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text-accent)" }}>
+                {tables.length}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
+                Tables
+              </div>
+            </div>
+            <div className="card" style={{ textAlign: "center" }}>
+              <div className="mono" style={{ fontSize: 28, fontWeight: 700, color: "var(--green)" }}>
+                {totalRows.toLocaleString()}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
+                Total Rows
+              </div>
+            </div>
+            <div className="card" style={{ textAlign: "center" }}>
+              <Link to="/data" style={{ textDecoration: "none" }}>
+                <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text-accent)" }}>
+                  &rarr;
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
+                  Explore Data
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          {/* Table listing */}
+          <div style={{ overflowX: "auto" }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Schema</th>
+                  <th>Table</th>
+                  <th style={{ textAlign: "right" }}>Rows</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tables.map((t) => (
+                  <tr key={`${t.schema}.${t.table}`}>
+                    <td style={{ color: "var(--text-muted)" }}>{t.schema}</td>
+                    <td>
+                      <Link to={`/browse/${t.schema}/${t.table}`}>
+                        {t.table}
+                      </Link>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <span className="num">
+                        {t.row_count != null ? t.row_count.toLocaleString() : "\u2014"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
