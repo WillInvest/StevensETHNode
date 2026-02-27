@@ -58,5 +58,16 @@ cryo logs --rpc "$RPC_URL" --contract 0xc3d688B66703497DAA19211EEdff47f25384cdc3
 echo "=== Extracting Compound V3 AbsorbDebt events ==="
 cryo logs --rpc "$RPC_URL" --contract 0xc3d688B66703497DAA19211EEdff47f25384cdc3 --topic0 0x1547a878dc89ad3c89a844c75c4f1332baef25e97f631a37cf2e3e9adaedb684 --blocks 15331586:latest --chunk-size 10000 --output-dir "$DATA_DIR/compound_v3_absorb"
 
+# Curve 3pool — TokenExchange events
+# Contract: 0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7
+# Topic0 (TokenExchange): 0x8b3e96f2b889fa771c53c981b40daf005f63f637f1869f707052d15a3dd97140
+echo "=== Extracting Curve TokenExchange events ==="
+cryo logs --rpc "$RPC_URL" --contract 0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7 --topic0 0x8b3e96f2b889fa771c53c981b40daf005f63f637f1869f707052d15a3dd97140 --blocks 10809473:latest --chunk-size 10000 --output-dir "$DATA_DIR/curve_token_exchange"
+
+# Curve 3pool — AddLiquidity events
+# Topic0 (AddLiquidity): 0x423f6495a08fc652425cf4ed0d1f9e37e571d9b9529b1c1c23cce780b2e7df0d
+echo "=== Extracting Curve AddLiquidity events ==="
+cryo logs --rpc "$RPC_URL" --contract 0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7 --topic0 0x423f6495a08fc652425cf4ed0d1f9e37e571d9b9529b1c1c23cce780b2e7df0d --blocks 10809473:latest --chunk-size 10000 --output-dir "$DATA_DIR/curve_add_liquidity"
+
 echo "=== Done ==="
 echo "Run scripts/load_parquet.sh to load into PostgreSQL."

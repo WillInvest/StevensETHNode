@@ -296,6 +296,82 @@
           {"address": ["0xc3d688B66703497DAA19211EEdff47f25384cdc3"]}
         ]
       }
+    },
+    {
+      "name": "curve_token_exchange",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 10809473}],
+      "table": {
+        "name": "curve_token_exchange",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "buyer", "type": "bytea"},
+          {"name": "sold_id", "type": "numeric"},
+          {"name": "tokens_sold", "type": "numeric"},
+          {"name": "bought_id", "type": "numeric"},
+          {"name": "tokens_bought", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "TokenExchange",
+        "type": "event TokenExchange(address indexed buyer, int128 sold_id, uint256 tokens_sold, int128 bought_id, uint256 tokens_bought)",
+        "inputs": [
+          {"name": "buyer", "column": "buyer"},
+          {"name": "sold_id", "column": "sold_id"},
+          {"name": "tokens_sold", "column": "tokens_sold"},
+          {"name": "bought_id", "column": "bought_id"},
+          {"name": "tokens_bought", "column": "tokens_bought"}
+        ],
+        "sources": [
+          {"address": ["0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7"]}
+        ]
+      }
+    },
+    {
+      "name": "curve_add_liquidity",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 10809473}],
+      "table": {
+        "name": "curve_add_liquidity",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "provider", "type": "bytea"},
+          {"name": "token_amounts_0", "type": "numeric"},
+          {"name": "token_amounts_1", "type": "numeric"},
+          {"name": "token_amounts_2", "type": "numeric"},
+          {"name": "fees_0", "type": "numeric"},
+          {"name": "fees_1", "type": "numeric"},
+          {"name": "fees_2", "type": "numeric"},
+          {"name": "token_supply", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "AddLiquidity",
+        "type": "event AddLiquidity(address indexed provider, uint256[3] token_amounts, uint256[3] fees, uint256 token_supply)",
+        "inputs": [
+          {"name": "provider", "column": "provider"},
+          {"name": "token_amounts_0", "column": "token_amounts_0"},
+          {"name": "token_amounts_1", "column": "token_amounts_1"},
+          {"name": "token_amounts_2", "column": "token_amounts_2"},
+          {"name": "fees_0", "column": "fees_0"},
+          {"name": "fees_1", "column": "fees_1"},
+          {"name": "fees_2", "column": "fees_2"},
+          {"name": "token_supply", "column": "token_supply"}
+        ],
+        "sources": [
+          {"address": ["0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7"]}
+        ]
+      }
     }
   ]
 }
