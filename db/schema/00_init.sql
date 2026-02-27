@@ -20,3 +20,7 @@ CREATE TABLE IF NOT EXISTS _meta_protocols (
 INSERT INTO _meta_protocols (name, description, start_block)
 VALUES ('uniswap_v3', 'Uniswap V3 DEX — USDC/WETH pool swaps', 12376729)
 ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO _meta_protocols (name, description, start_block)
+VALUES ('aave_v3', 'Aave V3 Lending — Supply, Borrow, Repay, Liquidation', 16291127)
+ON CONFLICT (name) DO NOTHING;

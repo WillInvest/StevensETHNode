@@ -53,6 +53,154 @@
           }
         ]
       }
+    },
+    {
+      "name": "aave_v3_supply",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 16291127}],
+      "table": {
+        "name": "aave_v3_supply",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "reserve", "type": "bytea"},
+          {"name": "user_addr", "type": "bytea"},
+          {"name": "on_behalf", "type": "bytea"},
+          {"name": "amount", "type": "numeric"},
+          {"name": "ref_code", "type": "int"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "Supply",
+        "type": "event Supply(address indexed reserve, address user, address indexed onBehalfOf, uint256 amount, uint16 indexed referralCode)",
+        "inputs": [
+          {"name": "reserve", "column": "reserve"},
+          {"name": "user", "column": "user_addr"},
+          {"name": "onBehalfOf", "column": "on_behalf"},
+          {"name": "amount", "column": "amount"},
+          {"name": "referralCode", "column": "ref_code"}
+        ],
+        "sources": [
+          {"address": ["0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"]}
+        ]
+      }
+    },
+    {
+      "name": "aave_v3_borrow",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 16291127}],
+      "table": {
+        "name": "aave_v3_borrow",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "reserve", "type": "bytea"},
+          {"name": "user_addr", "type": "bytea"},
+          {"name": "on_behalf", "type": "bytea"},
+          {"name": "amount", "type": "numeric"},
+          {"name": "interest_mode", "type": "int"},
+          {"name": "borrow_rate", "type": "numeric"},
+          {"name": "ref_code", "type": "int"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "Borrow",
+        "type": "event Borrow(address indexed reserve, address user, address indexed onBehalfOf, uint256 amount, uint8 interestRateMode, uint256 borrowRate, uint16 indexed referralCode)",
+        "inputs": [
+          {"name": "reserve", "column": "reserve"},
+          {"name": "user", "column": "user_addr"},
+          {"name": "onBehalfOf", "column": "on_behalf"},
+          {"name": "amount", "column": "amount"},
+          {"name": "interestRateMode", "column": "interest_mode"},
+          {"name": "borrowRate", "column": "borrow_rate"},
+          {"name": "referralCode", "column": "ref_code"}
+        ],
+        "sources": [
+          {"address": ["0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"]}
+        ]
+      }
+    },
+    {
+      "name": "aave_v3_repay",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 16291127}],
+      "table": {
+        "name": "aave_v3_repay",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "reserve", "type": "bytea"},
+          {"name": "user_addr", "type": "bytea"},
+          {"name": "repayer", "type": "bytea"},
+          {"name": "amount", "type": "numeric"},
+          {"name": "use_atokens", "type": "bool"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "Repay",
+        "type": "event Repay(address indexed reserve, address indexed user, address indexed repayer, uint256 amount, bool useATokens)",
+        "inputs": [
+          {"name": "reserve", "column": "reserve"},
+          {"name": "user", "column": "user_addr"},
+          {"name": "repayer", "column": "repayer"},
+          {"name": "amount", "column": "amount"},
+          {"name": "useATokens", "column": "use_atokens"}
+        ],
+        "sources": [
+          {"address": ["0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"]}
+        ]
+      }
+    },
+    {
+      "name": "aave_v3_liquidation",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 16291127}],
+      "table": {
+        "name": "aave_v3_liquidation",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "collateral_asset", "type": "bytea"},
+          {"name": "debt_asset", "type": "bytea"},
+          {"name": "user_addr", "type": "bytea"},
+          {"name": "debt_covered", "type": "numeric"},
+          {"name": "collateral_amount", "type": "numeric"},
+          {"name": "liquidator", "type": "bytea"},
+          {"name": "receive_atoken", "type": "bool"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "LiquidationCall",
+        "type": "event LiquidationCall(address indexed collateralAsset, address indexed debtAsset, address indexed user, uint256 debtToCover, uint256 liquidatedCollateralAmount, address liquidator, bool receiveAToken)",
+        "inputs": [
+          {"name": "collateralAsset", "column": "collateral_asset"},
+          {"name": "debtAsset", "column": "debt_asset"},
+          {"name": "user", "column": "user_addr"},
+          {"name": "debtToCover", "column": "debt_covered"},
+          {"name": "liquidatedCollateralAmount", "column": "collateral_amount"},
+          {"name": "liquidator", "column": "liquidator"},
+          {"name": "receiveAToken", "column": "receive_atoken"}
+        ],
+        "sources": [
+          {"address": ["0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"]}
+        ]
+      }
     }
   ]
 }
