@@ -6,6 +6,7 @@ const navItems = [
   { to: "/mempool", label: "Mempool" },
   { to: "/extraction", label: "Extraction" },
   { to: "/query", label: "Query" },
+  { to: "/sci", label: "SCI" },
 ];
 
 export default function Layout() {

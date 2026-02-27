@@ -6,6 +6,7 @@ import Browse from "./pages/Browse";
 import Extraction from "./pages/Extraction";
 import Mempool from "./pages/Mempool";
 import Query from "./pages/Query";
+import SCI from "./pages/SCI";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/extraction" element={<Extraction />} />
         <Route path="/mempool" element={<Mempool />} />
         <Route path="/query" element={<Query />} />
+        <Route path="/sci" element={<SCI />} />
       </Route>
     </Routes>
   );
