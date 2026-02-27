@@ -6,6 +6,7 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import { basicSetup } from "codemirror";
 import { renderCell } from "../cellRenderer";
 import QueryChart from "../components/QueryChart";
+import SavedQueries from "../components/SavedQueries";
 
 const DEFAULT_SQL = "SELECT * FROM uniswap_v3_swaps ORDER BY block_num DESC LIMIT 20";
 
@@ -16,6 +17,16 @@ export default function Query() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showChart, setShowChart] = useState(false);
+
+  const loadSavedQuery = (sqlText) => {
+    if (viewRef.current) {
+      viewRef.current.dispatch({
+        changes: { from: 0, to: viewRef.current.state.doc.length, insert: sqlText },
+      });
+    }
+  };
+
+  const saved = SavedQueries({ onSelect: loadSavedQuery });
 
   useEffect(() => {
     if (editorRef.current && !viewRef.current) {
@@ -97,6 +108,9 @@ export default function Query() {
     <div className="fade-in-up">
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16 }}>SQL Query</h2>
 
+      <saved.SavePanel />
+      <saved.SaveForm currentSql={viewRef.current?.state.doc.toString() || ""} />
+
       <div className="card" style={{ marginBottom: 16, padding: 0, overflow: "hidden" }}>
         <div ref={editorRef} />
       </div>
@@ -123,6 +137,7 @@ export default function Query() {
             </button>
             <button className="btn btn-ghost" onClick={() => exportResult("csv")}>CSV</button>
             <button className="btn btn-ghost" onClick={() => exportResult("json")}>JSON</button>
+            <button className="btn btn-ghost" onClick={() => saved.setShowSave(true)}>Save</button>
           </>
         )}
       </div>

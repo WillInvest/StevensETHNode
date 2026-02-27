@@ -22,11 +22,11 @@
 - [x] Major bridge events (Arbitrum, Optimism, Base)
 
 ## Phase 3: Research Platform
-- [ ] SQL editor with CodeMirror (run ad-hoc queries)
-- [ ] Query result visualization (charts, time series)
-- [ ] Statistical analysis integration (pandas, scipy)
-- [ ] CSV/JSON export from any query or table view
-- [ ] Saved queries library
+- [x] SQL editor with CodeMirror (run ad-hoc queries)
+- [x] Query result visualization (charts, time series)
+- [x] Statistical analysis integration (pandas, scipy)
+- [x] CSV/JSON export from any query or table view
+- [x] Saved queries library
 
 ## Phase 4: Stevens Crypto Index (SCI)
 - [ ] Define SCI methodology (composite 0–100 score)
