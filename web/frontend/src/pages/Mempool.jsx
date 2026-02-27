@@ -60,7 +60,7 @@ export default function Mempool() {
     );
   }
 
-  const { gas, pending, latest_block, high_value_txs, top_gas_bidders, fee_history, txpool } = data;
+  const { gas, pending, latest_block, high_value_txs, top_gas_bidders, fee_history, txpool, burn } = data;
 
   return (
     <div className="fade-in-up">
@@ -71,6 +71,11 @@ export default function Mempool() {
           {connected ? "Live \u00b7 updating every 3s" : "Connecting..."}
           {" \u00b7 "}
           Block <span className="num">{formatNum(data.block_number)}</span>
+          {data.syncing && (
+            <span style={{ color: "var(--amber)", marginLeft: 8 }}>
+              (syncing{data.sync_info ? ` — ${formatNum(data.sync_info.current_block)} / ${formatNum(data.sync_info.highest_block)}` : ""})
+            </span>
+          )}
         </p>
       </div>
 
@@ -121,6 +126,46 @@ export default function Mempool() {
         </div>
       </div>
 
+      {/* ETH Burn & Tx Type Row */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+        {burn && (
+          <div className="card" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>ETH Burned (latest block)</div>
+              <div className="mono" style={{ fontSize: 22, fontWeight: 700, color: "var(--red)" }}>
+                {burn.latest_block_eth.toFixed(4)} ETH
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Last 20 Blocks</div>
+              <div className="mono" style={{ fontSize: 22, fontWeight: 700, color: "var(--amber)" }}>
+                {burn.last_20_blocks_eth.toFixed(4)} ETH
+              </div>
+            </div>
+          </div>
+        )}
+        {latest_block.tx_types && (
+          <div className="card">
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
+              Tx Types (block {formatNum(latest_block.number)})
+            </div>
+            <div style={{ display: "flex", gap: 12 }}>
+              {[
+                { label: "EIP-1559", count: latest_block.tx_types.eip1559, color: "var(--text-accent)" },
+                { label: "Legacy", count: latest_block.tx_types.legacy, color: "var(--text-muted)" },
+                { label: "Blob", count: latest_block.tx_types.blob, color: "var(--green)" },
+                { label: "2930", count: latest_block.tx_types.eip2930, color: "var(--amber)" },
+              ].filter(t => t.count > 0).map(t => (
+                <div key={t.label} style={{ textAlign: "center" }}>
+                  <div className="mono num" style={{ fontSize: 18, fontWeight: 700, color: t.color }}>{t.count}</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)" }}>{t.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Tab buttons */}
       <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
         {[
@@ -146,9 +191,9 @@ export default function Mempool() {
             Recent Fee History (last {fee_history.length} blocks)
           </div>
 
-          {/* Gas utilization bars */}
+          {/* Gas utilization bars — latest first */}
           <div style={{ marginBottom: 16 }}>
-            {fee_history.slice(-10).map((b) => (
+            {[...fee_history].reverse().slice(0, 10).map((b) => (
               <UtilBar key={b.block} ratio={b.gas_used_ratio} label={`Block ${formatNum(b.block)}`} />
             ))}
           </div>
@@ -159,6 +204,7 @@ export default function Mempool() {
                 <tr>
                   <th>Block</th>
                   <th>Base Fee</th>
+                  <th>Burn</th>
                   <th>Gas %</th>
                   <th>P10</th>
                   <th>P25</th>
@@ -168,10 +214,11 @@ export default function Mempool() {
                 </tr>
               </thead>
               <tbody>
-                {fee_history.map((b) => (
+                {[...fee_history].reverse().map((b) => (
                   <tr key={b.block}>
                     <td><span className="num">{formatNum(b.block)}</span></td>
                     <td>{gwei(b.base_fee_gwei)}</td>
+                    <td style={{ color: "var(--red)", fontSize: 12 }}>{b.burn_eth?.toFixed(4)}</td>
                     <td style={{ color: b.gas_used_ratio > 0.8 ? "var(--red)" : b.gas_used_ratio > 0.5 ? "var(--amber)" : "var(--green)" }}>
                       {Math.round(b.gas_used_ratio * 100)}%
                     </td>

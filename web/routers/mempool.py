@@ -59,10 +59,11 @@ def _get_mempool_snapshot():
         ("eth_maxPriorityFeePerGas", []),                        # 1
         ("eth_feeHistory", ["0x14", "latest", [10, 25, 50, 75, 90]]),  # 2 — last 20 blocks
         ("eth_getBlockByNumber", ["pending", True]),             # 3
-        ("eth_getBlockByNumber", ["latest", False]),             # 4
+        ("eth_getBlockByNumber", ["latest", True]),              # 4 — full txs for type analysis
         ("eth_blockNumber", []),                                 # 5
         ("txpool_status", []),                                   # 6
         ("txpool_content", []),                                  # 7
+        ("eth_syncing", []),                                     # 8
     ])
 
     # Gas prices
@@ -79,10 +80,15 @@ def _get_mempool_snapshot():
     fee_history = []
     for i, base in enumerate(base_fees[:-1]):  # last entry is next block's base fee
         block_rewards = rewards[i] if i < len(rewards) else []
+        ratio = gas_ratios[i] if i < len(gas_ratios) else 0
+        # Estimate gas_used from ratio * 30M gas limit (approximate)
+        est_gas_used = int(ratio * 30_000_000)
+        burn_eth = _wei_to_eth(base * est_gas_used)
         fee_history.append({
             "block": oldest_block + i,
             "base_fee_gwei": _wei_to_gwei(base),
-            "gas_used_ratio": round(gas_ratios[i], 3) if i < len(gas_ratios) else 0,
+            "gas_used_ratio": round(ratio, 3),
+            "burn_eth": burn_eth,
             "priority_p10_gwei": _wei_to_gwei(_hex_to_int(block_rewards[0])) if len(block_rewards) > 0 else 0,
             "priority_p25_gwei": _wei_to_gwei(_hex_to_int(block_rewards[1])) if len(block_rewards) > 1 else 0,
             "priority_p50_gwei": _wei_to_gwei(_hex_to_int(block_rewards[2])) if len(block_rewards) > 2 else 0,
@@ -149,7 +155,35 @@ def _get_mempool_snapshot():
     latest_gas_used = _hex_to_int(latest_block.get("gasUsed", "0x0"))
     latest_gas_limit = _hex_to_int(latest_block.get("gasLimit", "0x0"))
     latest_base_fee = _hex_to_int(latest_block.get("baseFeePerGas", "0x0"))
-    latest_tx_count = len(latest_block.get("transactions", []))
+    latest_txs = latest_block.get("transactions", [])
+    latest_tx_count = len(latest_txs)
+    latest_timestamp = _hex_to_int(latest_block.get("timestamp", "0x0"))
+
+    # ETH burned in latest block (base_fee * gas_used)
+    eth_burned = _wei_to_eth(latest_base_fee * latest_gas_used)
+
+    # Tx type breakdown from latest block
+    type_counts = {"legacy": 0, "eip2930": 0, "eip1559": 0, "blob": 0}
+    for tx in latest_txs:
+        tx_type = _hex_to_int(tx.get("type", "0x0")) if isinstance(tx, dict) else 0
+        if tx_type == 0:
+            type_counts["legacy"] += 1
+        elif tx_type == 1:
+            type_counts["eip2930"] += 1
+        elif tx_type == 2:
+            type_counts["eip1559"] += 1
+        elif tx_type == 3:
+            type_counts["blob"] += 1
+
+    # Sync status
+    sync_result = results.get(8)
+    is_syncing = sync_result is not None and sync_result is not False
+    sync_info = None
+    if is_syncing and isinstance(sync_result, dict):
+        sync_info = {
+            "current_block": _hex_to_int(sync_result.get("currentBlock", "0x0")),
+            "highest_block": _hex_to_int(sync_result.get("highestBlock", "0x0")),
+        }
 
     # ---- txpool data (only available if Erigon started with txpool API) ----
     txpool = None
@@ -210,8 +244,14 @@ def _get_mempool_snapshot():
             "nonce_gaps": nonce_gaps,
         }
 
+    # Total burn from fee history (last 20 blocks)
+    total_burn_20 = sum(b["burn_eth"] for b in fee_history)
+
     return {
         "block_number": block_number,
+        "block_timestamp": latest_timestamp,
+        "syncing": is_syncing,
+        "sync_info": sync_info,
         "gas": {
             "price_gwei": _wei_to_gwei(gas_price),
             "priority_fee_gwei": _wei_to_gwei(priority_fee),
@@ -230,6 +270,13 @@ def _get_mempool_snapshot():
             "gas_used": latest_gas_used,
             "gas_limit": latest_gas_limit,
             "utilization": round(latest_gas_used / latest_gas_limit * 100, 1) if latest_gas_limit > 0 else 0,
+            "eth_burned": eth_burned,
+            "tx_types": type_counts,
+            "timestamp": latest_timestamp,
+        },
+        "burn": {
+            "latest_block_eth": eth_burned,
+            "last_20_blocks_eth": round(total_burn_20, 6),
         },
         "high_value_txs": high_value[:20],
         "top_gas_bidders": top_gas_bidders,
