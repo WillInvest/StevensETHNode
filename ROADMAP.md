@@ -29,12 +29,12 @@
 - [x] Saved queries library
 
 ## Phase 4: Stevens Crypto Index (SCI)
-- [ ] Define SCI methodology (composite 0–100 score)
-- [ ] Components: protocol TVL utilization, DEX volumes, lending rates, liquidations, gas prices, network health
-- [ ] Historical SCI calculation engine
-- [ ] Real-time SCI updates
-- [ ] SCI dashboard with breakdown charts
-- [ ] Academic paper / methodology documentation
+- [x] Define SCI methodology (composite 0–100 score)
+- [x] Components: protocol TVL utilization, DEX volumes, lending rates, liquidations, gas prices, network health
+- [x] Historical SCI calculation engine
+- [x] Real-time SCI updates
+- [x] SCI dashboard with breakdown charts
+- [x] Academic paper / methodology documentation
 
 ## Phase 5: Polish & Deploy
 - [ ] Tailwind CSS + shadcn/ui design system
