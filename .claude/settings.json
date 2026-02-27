@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uvicorn*)",
+      "Bash(npm run*)",
+      "Bash(psql*)",
+      "Bash(cryo*)",
+      "Bash(duckdb*)",
+      "Bash(pip install*)",
+      "Bash(npm install*)",
+      "Bash(git*)"
+    ]
+  }
+}

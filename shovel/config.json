@@ -1,0 +1,58 @@
+{
+  "pg_url": "$ETHNODE_DATABASE_URL",
+  "eth_sources": [
+    {
+      "name": "mainnet",
+      "chain_id": 1,
+      "url": "http://127.0.0.1:8545"
+    }
+  ],
+  "integrations": [
+    {
+      "name": "uniswap_v3_swaps",
+      "enabled": true,
+      "sources": [
+        {
+          "name": "mainnet",
+          "start": 12376729
+        }
+      ],
+      "table": {
+        "name": "uniswap_v3_swaps",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "sender", "type": "bytea"},
+          {"name": "recipient", "type": "bytea"},
+          {"name": "amount0", "type": "numeric"},
+          {"name": "amount1", "type": "numeric"},
+          {"name": "sqrt_price_x96", "type": "numeric"},
+          {"name": "liquidity", "type": "numeric"},
+          {"name": "tick", "type": "int"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "Swap",
+        "type": "event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)",
+        "inputs": [
+          {"name": "sender", "column": "sender"},
+          {"name": "recipient", "column": "recipient"},
+          {"name": "amount0", "column": "amount0"},
+          {"name": "amount1", "column": "amount1"},
+          {"name": "sqrtPriceX96", "column": "sqrt_price_x96"},
+          {"name": "liquidity", "column": "liquidity"},
+          {"name": "tick", "column": "tick"}
+        ],
+        "sources": [
+          {
+            "address": ["0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640"]
+          }
+        ]
+      }
+    }
+  ]
+}
