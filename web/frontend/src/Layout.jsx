@@ -7,6 +7,7 @@ const navItems = [
   { to: "/extraction", label: "Extraction" },
   { to: "/query", label: "Query" },
   { to: "/sci", label: "SCI" },
+  { to: "/monitoring", label: "Monitor" },
 ];
 
 export default function Layout({ user, onLogout }) {

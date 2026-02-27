@@ -8,6 +8,7 @@ import Extraction from "./pages/Extraction";
 import Mempool from "./pages/Mempool";
 import Query from "./pages/Query";
 import SCI from "./pages/SCI";
+import Monitoring from "./pages/Monitoring";
 import Login from "./pages/Login";
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/mempool" element={<Mempool />} />
         <Route path="/query" element={<Query />} />
         <Route path="/sci" element={<SCI />} />
+        <Route path="/monitoring" element={<Monitoring />} />
       </Route>
     </Routes>
   );
