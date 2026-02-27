@@ -5,7 +5,7 @@
 - [x] Tool installation (Cryo, Shovel, DuckDB)
 - [x] Python + Node.js dependency setup
 
-## Phase 1: MVP — Indexing + Web Viewer ← CURRENT
+## Phase 1: MVP — Indexing + Web Viewer
 - [x] Shovel config for Uniswap V3 Swap events
 - [x] Cryo backfill scripts for historical data
 - [x] DuckDB → PostgreSQL loader
@@ -37,8 +37,8 @@
 - [x] Academic paper / methodology documentation
 
 ## Phase 5: Polish & Deploy
-- [ ] Tailwind CSS + shadcn/ui design system
-- [ ] Team authentication (SSO or simple auth)
-- [ ] nginx reverse proxy + systemd services
-- [ ] Monitoring and alerting (Shovel lag, DB size)
-- [ ] Documentation site
+- [x] Tailwind CSS + shadcn/ui design system
+- [x] Team authentication (SSO or simple auth)
+- [x] nginx reverse proxy + systemd services
+- [x] Monitoring and alerting (Shovel lag, DB size)
+- [x] Documentation site
