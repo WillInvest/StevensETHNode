@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from web.db import get_pool, close_pool
 from web.routers import tables, browse, extraction, mempool, query, stats, export, saved_queries
+from web.routers import sci as sci_router
 
 
 @asynccontextmanager
@@ -35,6 +36,7 @@ app.include_router(query.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(export.router, prefix="/api")
 app.include_router(saved_queries.router, prefix="/api")
+app.include_router(sci_router.router, prefix="/api")
 
 
 @app.get("/api/health")
