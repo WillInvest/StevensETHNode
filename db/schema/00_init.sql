@@ -40,3 +40,7 @@ ON CONFLICT (name) DO NOTHING;
 INSERT INTO _meta_protocols (name, description, start_block)
 VALUES ('erc20_transfers', 'ERC-20 Transfers — WETH, USDC, USDT, DAI', 4719568)
 ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO _meta_protocols (name, description, start_block)
+VALUES ('bridges', 'L2 Bridges — Arbitrum, Optimism, Base deposit events', 15411056)
+ON CONFLICT (name) DO NOTHING;

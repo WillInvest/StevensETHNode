@@ -94,5 +94,22 @@ cryo logs --rpc "$RPC_URL" --contract 0xdAC17F958D2ee523a2206206994597C13D831ec7
 echo "=== Extracting ERC-20 Transfer events (DAI) ==="
 cryo logs --rpc "$RPC_URL" --contract 0x6B175474E89094C44Da98b954EedeAC495271d0F --topic0 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef --blocks 8928158:latest --chunk-size 10000 --output-dir "$DATA_DIR/erc20_dai"
 
+# Arbitrum Bridge — MessageDelivered events
+# Contract: 0x8315177aB297bA92A06054cE80a67Ed4DBd7ed3a
+# Topic0 (MessageDelivered): 0x5e3c1311ea442664e8b1611bfabef659120ea7a0a2cfc0667700bebc69cbffe1
+echo "=== Extracting Arbitrum MessageDelivered events ==="
+cryo logs --rpc "$RPC_URL" --contract 0x8315177aB297bA92A06054cE80a67Ed4DBd7ed3a --topic0 0x5e3c1311ea442664e8b1611bfabef659120ea7a0a2cfc0667700bebc69cbffe1 --blocks 15411056:latest --chunk-size 10000 --output-dir "$DATA_DIR/arb_message_delivered"
+
+# Optimism Portal — TransactionDeposited events
+# Contract: 0xbEb5Fc579115071764c7423A4f12eDde41f106Ed
+# Topic0 (TransactionDeposited): 0xb3813568d9991fc951961fcb4c784893574240a28925604d09fc577c55bb7c32
+echo "=== Extracting Optimism TransactionDeposited events ==="
+cryo logs --rpc "$RPC_URL" --contract 0xbEb5Fc579115071764c7423A4f12eDde41f106Ed --topic0 0xb3813568d9991fc951961fcb4c784893574240a28925604d09fc577c55bb7c32 --blocks 17365801:latest --chunk-size 10000 --output-dir "$DATA_DIR/op_tx_deposited"
+
+# Base Portal — TransactionDeposited events
+# Contract: 0x49048044D57e1C92A77f79988d21Fa8fAF36f97
+echo "=== Extracting Base TransactionDeposited events ==="
+cryo logs --rpc "$RPC_URL" --contract 0x49048044D57e1C92A77f79988d21Fa8fAF36f97 --topic0 0xb3813568d9991fc951961fcb4c784893574240a28925604d09fc577c55bb7c32 --blocks 17482143:latest --chunk-size 10000 --output-dir "$DATA_DIR/base_tx_deposited"
+
 echo "=== Done ==="
 echo "Run scripts/load_parquet.sh to load into PostgreSQL."

@@ -472,6 +472,113 @@
           }
         ]
       }
+    },
+    {
+      "name": "arb_message_delivered",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 15411056}],
+      "table": {
+        "name": "arb_message_delivered",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "message_index", "type": "numeric"},
+          {"name": "before_acc", "type": "bytea"},
+          {"name": "inbox", "type": "bytea"},
+          {"name": "kind", "type": "int"},
+          {"name": "sender", "type": "bytea"},
+          {"name": "message_hash", "type": "bytea"},
+          {"name": "base_fee", "type": "numeric"},
+          {"name": "timestamp_val", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "MessageDelivered",
+        "type": "event MessageDelivered(uint256 indexed messageIndex, bytes32 indexed beforeInboxAcc, address inbox, uint8 kind, address sender, bytes32 messageDataHash, uint256 baseFeeL1, uint64 timestamp)",
+        "inputs": [
+          {"name": "messageIndex", "column": "message_index"},
+          {"name": "beforeInboxAcc", "column": "before_acc"},
+          {"name": "inbox", "column": "inbox"},
+          {"name": "kind", "column": "kind"},
+          {"name": "sender", "column": "sender"},
+          {"name": "messageDataHash", "column": "message_hash"},
+          {"name": "baseFeeL1", "column": "base_fee"},
+          {"name": "timestamp", "column": "timestamp_val"}
+        ],
+        "sources": [
+          {"address": ["0x8315177aB297bA92A06054cE80a67Ed4DBd7ed3a"]}
+        ]
+      }
+    },
+    {
+      "name": "op_tx_deposited",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 17365801}],
+      "table": {
+        "name": "op_tx_deposited",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "from_addr", "type": "bytea"},
+          {"name": "to_addr", "type": "bytea"},
+          {"name": "version", "type": "numeric"},
+          {"name": "opaque_data", "type": "bytea"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "TransactionDeposited",
+        "type": "event TransactionDeposited(address indexed from, address indexed to, uint256 indexed version, bytes opaqueData)",
+        "inputs": [
+          {"name": "from", "column": "from_addr"},
+          {"name": "to", "column": "to_addr"},
+          {"name": "version", "column": "version"},
+          {"name": "opaqueData", "column": "opaque_data"}
+        ],
+        "sources": [
+          {"address": ["0xbEb5Fc579115071764c7423A4f12eDde41f106Ed"]}
+        ]
+      }
+    },
+    {
+      "name": "base_tx_deposited",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 17482143}],
+      "table": {
+        "name": "base_tx_deposited",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "from_addr", "type": "bytea"},
+          {"name": "to_addr", "type": "bytea"},
+          {"name": "version", "type": "numeric"},
+          {"name": "opaque_data", "type": "bytea"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "TransactionDeposited",
+        "type": "event TransactionDeposited(address indexed from, address indexed to, uint256 indexed version, bytes opaqueData)",
+        "inputs": [
+          {"name": "from", "column": "from_addr"},
+          {"name": "to", "column": "to_addr"},
+          {"name": "version", "column": "version"},
+          {"name": "opaqueData", "column": "opaque_data"}
+        ],
+        "sources": [
+          {"address": ["0x49048044D57e1C92A77f79988d21Fa8fAF36f97"]}
+        ]
+      }
     }
   ]
 }

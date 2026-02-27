@@ -14,12 +14,12 @@
 - [x] End-to-end test: Cryo → DB → API → Browser
 
 ## Phase 2: Multi-Protocol Indexing
-- [ ] Aave V3 (Supply, Borrow, Repay, Liquidation events)
-- [ ] Compound V3 (Supply, Withdraw, Absorb events)
-- [ ] Curve (TokenExchange, AddLiquidity events)
-- [ ] Lido (Submitted, TransferShares events)
-- [ ] ERC-20 Transfer events (major tokens: WETH, USDC, USDT, DAI)
-- [ ] Major bridge events (Arbitrum, Optimism, Base)
+- [x] Aave V3 (Supply, Borrow, Repay, Liquidation events)
+- [x] Compound V3 (Supply, Withdraw, Absorb events)
+- [x] Curve (TokenExchange, AddLiquidity events)
+- [x] Lido (Submitted, TransferShares events)
+- [x] ERC-20 Transfer events (major tokens: WETH, USDC, USDT, DAI)
+- [x] Major bridge events (Arbitrum, Optimism, Base)
 
 ## Phase 3: Research Platform
 - [ ] SQL editor with CodeMirror (run ad-hoc queries)
