@@ -11,7 +11,7 @@
 - [x] DuckDB → PostgreSQL loader
 - [x] FastAPI backend (table list, paginated browse)
 - [x] React frontend (Home dashboard, table browser)
-- [ ] End-to-end test: Cryo → DB → API → Browser
+- [x] End-to-end test: Cryo → DB → API → Browser
 
 ## Phase 2: Multi-Protocol Indexing
 - [ ] Aave V3 (Supply, Borrow, Repay, Liquidation events)
