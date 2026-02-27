@@ -9,7 +9,11 @@ const navItems = [
   { to: "/sci", label: "SCI" },
 ];
 
-export default function Layout() {
+export default function Layout({ user, onLogout }) {
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    onLogout();
+  };
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <header style={{
@@ -65,6 +69,20 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+        {user && (
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{user.username}</span>
+            <button
+              onClick={handleLogout}
+              style={{
+                fontSize: 12, color: "var(--text-secondary)", background: "none",
+                border: "none", cursor: "pointer", padding: "4px 8px",
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </header>
       <main style={{
         padding: "28px 32px",
