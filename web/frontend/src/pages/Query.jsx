@@ -5,6 +5,7 @@ import { sql } from "@codemirror/lang-sql";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { basicSetup } from "codemirror";
 import { renderCell } from "../cellRenderer";
+import QueryChart from "../components/QueryChart";
 
 const DEFAULT_SQL = "SELECT * FROM uniswap_v3_swaps ORDER BY block_num DESC LIMIT 20";
 
@@ -14,6 +15,7 @@ export default function Query() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
     if (editorRef.current && !viewRef.current) {
@@ -85,9 +87,17 @@ export default function Query() {
           {loading ? "Running..." : "Execute (Ctrl+Enter)"}
         </button>
         {result && (
-          <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-            {result.row_count} rows in {result.elapsed_seconds}s
-          </span>
+          <>
+            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+              {result.row_count} rows in {result.elapsed_seconds}s
+            </span>
+            <button
+              className={`btn ${showChart ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setShowChart(!showChart)}
+            >
+              {showChart ? "Hide Chart" : "Visualize"}
+            </button>
+          </>
         )}
       </div>
 
@@ -95,6 +105,10 @@ export default function Query() {
         <div className="card" style={{ borderColor: "var(--red)", marginBottom: 16 }}>
           <span style={{ color: "var(--red)", fontSize: 13 }}>{error}</span>
         </div>
+      )}
+
+      {showChart && result && result.rows.length > 0 && (
+        <QueryChart columns={result.columns} rows={result.rows} />
       )}
 
       {result && result.rows.length > 0 && (
