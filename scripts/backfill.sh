@@ -11,7 +11,7 @@ mkdir -p "$DATA_DIR"
 # Contract: 0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640
 # Topic0 (Swap): 0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67
 echo "=== Extracting Uniswap V3 Swap events ==="
-cryo collect logs \
+cryo logs \
   --rpc "$RPC_URL" \
   --contract 0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640 \
   --topic0 0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67 \

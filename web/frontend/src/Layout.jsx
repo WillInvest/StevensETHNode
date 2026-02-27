@@ -38,7 +38,7 @@ export default function Layout() {
         <h1 style={styles.title}>Stevens Blockchain Analytics</h1>
         <nav style={styles.nav}>
           <Link to="/" style={styles.link}>Home</Link>
-          <Link to="/" style={styles.link}>Browse</Link>
+          <Link to="/extraction" style={styles.link}>Extraction</Link>
         </nav>
       </header>
       <main style={styles.main}>
