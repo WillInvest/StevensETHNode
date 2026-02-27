@@ -32,3 +32,33 @@ async def list_tables():
             })
 
     return {"tables": result}
+
+
+@router.get("/tables/{schema}/{table}/columns")
+async def get_table_columns(schema: str, table: str):
+    """Get column details for a specific table (schema browser)."""
+    query = """
+        SELECT column_name, data_type, is_nullable,
+               column_default, character_maximum_length
+        FROM information_schema.columns
+        WHERE table_schema = $1 AND table_name = $2
+        ORDER BY ordinal_position
+    """
+    async with get_conn() as conn:
+        rows = await conn.execute(query, [schema, table])
+        columns = await rows.fetchall()
+
+    return {
+        "schema": schema,
+        "table": table,
+        "columns": [
+            {
+                "name": col[0],
+                "type": col[1],
+                "nullable": col[2] == "YES",
+                "default": col[3],
+                "max_length": col[4],
+            }
+            for col in columns
+        ],
+    }
