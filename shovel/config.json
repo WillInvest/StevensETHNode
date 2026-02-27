@@ -434,6 +434,44 @@
           {"address": ["0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"]}
         ]
       }
+    },
+    {
+      "name": "erc20_transfers",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 4719568}],
+      "table": {
+        "name": "erc20_transfers",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "from_addr", "type": "bytea"},
+          {"name": "to_addr", "type": "bytea"},
+          {"name": "value", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "Transfer",
+        "type": "event Transfer(address indexed from, address indexed to, uint256 value)",
+        "inputs": [
+          {"name": "from", "column": "from_addr"},
+          {"name": "to", "column": "to_addr"},
+          {"name": "value", "column": "value"}
+        ],
+        "sources": [
+          {
+            "address": [
+              "0xC02aaA39b223FE8D0A5C4F27eAD9083C756Cc2",
+              "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+            ]
+          }
+        ]
+      }
     }
   ]
 }

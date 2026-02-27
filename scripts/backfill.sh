@@ -80,5 +80,19 @@ cryo logs --rpc "$RPC_URL" --contract 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84
 echo "=== Extracting Lido TransferShares events ==="
 cryo logs --rpc "$RPC_URL" --contract 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84 --topic0 0x9d9c909296d9c674451c0c24f02cb64981eb3b727f99865939192f880a755dcb --blocks 11473216:latest --chunk-size 10000 --output-dir "$DATA_DIR/lido_transfer_shares"
 
+# ERC-20 Transfer events — WETH, USDC, USDT, DAI
+# Topic0 (Transfer): 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+echo "=== Extracting ERC-20 Transfer events (WETH) ==="
+cryo logs --rpc "$RPC_URL" --contract 0xC02aaA39b223FE8D0A5C4F27eAD9083C756Cc2 --topic0 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef --blocks 4719568:latest --chunk-size 10000 --output-dir "$DATA_DIR/erc20_weth"
+
+echo "=== Extracting ERC-20 Transfer events (USDC) ==="
+cryo logs --rpc "$RPC_URL" --contract 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 --topic0 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef --blocks 6082465:latest --chunk-size 10000 --output-dir "$DATA_DIR/erc20_usdc"
+
+echo "=== Extracting ERC-20 Transfer events (USDT) ==="
+cryo logs --rpc "$RPC_URL" --contract 0xdAC17F958D2ee523a2206206994597C13D831ec7 --topic0 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef --blocks 4634748:latest --chunk-size 10000 --output-dir "$DATA_DIR/erc20_usdt"
+
+echo "=== Extracting ERC-20 Transfer events (DAI) ==="
+cryo logs --rpc "$RPC_URL" --contract 0x6B175474E89094C44Da98b954EedeAC495271d0F --topic0 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef --blocks 8928158:latest --chunk-size 10000 --output-dir "$DATA_DIR/erc20_dai"
+
 echo "=== Done ==="
 echo "Run scripts/load_parquet.sh to load into PostgreSQL."

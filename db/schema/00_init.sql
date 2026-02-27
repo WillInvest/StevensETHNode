@@ -36,3 +36,7 @@ ON CONFLICT (name) DO NOTHING;
 INSERT INTO _meta_protocols (name, description, start_block)
 VALUES ('lido', 'Lido stETH — Submitted, TransferShares', 11473216)
 ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO _meta_protocols (name, description, start_block)
+VALUES ('erc20_transfers', 'ERC-20 Transfers — WETH, USDC, USDT, DAI', 4719568)
+ON CONFLICT (name) DO NOTHING;
