@@ -69,5 +69,16 @@ cryo logs --rpc "$RPC_URL" --contract 0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7
 echo "=== Extracting Curve AddLiquidity events ==="
 cryo logs --rpc "$RPC_URL" --contract 0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7 --topic0 0x423f6495a08fc652425cf4ed0d1f9e37e571d9b9529b1c1c23cce780b2e7df0d --blocks 10809473:latest --chunk-size 10000 --output-dir "$DATA_DIR/curve_add_liquidity"
 
+# Lido stETH — Submitted events
+# Contract: 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84
+# Topic0 (Submitted): 0x96a25c8ce0baabc1fdefd93e9ed25d8e092a3332f3aa9a41722b5697231d1d1a
+echo "=== Extracting Lido Submitted events ==="
+cryo logs --rpc "$RPC_URL" --contract 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84 --topic0 0x96a25c8ce0baabc1fdefd93e9ed25d8e092a3332f3aa9a41722b5697231d1d1a --blocks 11473216:latest --chunk-size 10000 --output-dir "$DATA_DIR/lido_submitted"
+
+# Lido stETH — TransferShares events
+# Topic0 (TransferShares): 0x9d9c909296d9c674451c0c24f02cb64981eb3b727f99865939192f880a755dcb
+echo "=== Extracting Lido TransferShares events ==="
+cryo logs --rpc "$RPC_URL" --contract 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84 --topic0 0x9d9c909296d9c674451c0c24f02cb64981eb3b727f99865939192f880a755dcb --blocks 11473216:latest --chunk-size 10000 --output-dir "$DATA_DIR/lido_transfer_shares"
+
 echo "=== Done ==="
 echo "Run scripts/load_parquet.sh to load into PostgreSQL."

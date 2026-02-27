@@ -372,6 +372,68 @@
           {"address": ["0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7"]}
         ]
       }
+    },
+    {
+      "name": "lido_submitted",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 11473216}],
+      "table": {
+        "name": "lido_submitted",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "sender", "type": "bytea"},
+          {"name": "amount", "type": "numeric"},
+          {"name": "referral", "type": "bytea"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "Submitted",
+        "type": "event Submitted(address indexed sender, uint256 amount, address referral)",
+        "inputs": [
+          {"name": "sender", "column": "sender"},
+          {"name": "amount", "column": "amount"},
+          {"name": "referral", "column": "referral"}
+        ],
+        "sources": [
+          {"address": ["0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"]}
+        ]
+      }
+    },
+    {
+      "name": "lido_transfer_shares",
+      "enabled": true,
+      "sources": [{"name": "mainnet", "start": 11473216}],
+      "table": {
+        "name": "lido_transfer_shares",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "from_addr", "type": "bytea"},
+          {"name": "to_addr", "type": "bytea"},
+          {"name": "shares_value", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_num", "column": "block_num"},
+        {"name": "tx_hash", "column": "tx_hash"}
+      ],
+      "event": {
+        "name": "TransferShares",
+        "type": "event TransferShares(address indexed from, address indexed to, uint256 sharesValue)",
+        "inputs": [
+          {"name": "from", "column": "from_addr"},
+          {"name": "to", "column": "to_addr"},
+          {"name": "sharesValue", "column": "shares_value"}
+        ],
+        "sources": [
+          {"address": ["0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"]}
+        ]
+      }
     }
   ]
 }
