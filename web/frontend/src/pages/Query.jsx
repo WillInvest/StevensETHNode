@@ -44,6 +44,30 @@ export default function Query() {
     };
   }, []);
 
+  const exportResult = (format) => {
+    const sqlText = viewRef.current?.state.doc.toString() || "";
+    if (!sqlText.trim()) return;
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/api/export/query";
+    form.target = "_blank";
+    // Use fetch for POST export
+    fetch("/api/export/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sql: sqlText, format }),
+    })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `query_result.${format}`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+  };
+
   const runQuery = async () => {
     const sqlText = viewRef.current?.state.doc.toString() || "";
     if (!sqlText.trim()) return;
@@ -97,6 +121,8 @@ export default function Query() {
             >
               {showChart ? "Hide Chart" : "Visualize"}
             </button>
+            <button className="btn btn-ghost" onClick={() => exportResult("csv")}>CSV</button>
+            <button className="btn btn-ghost" onClick={() => exportResult("json")}>JSON</button>
           </>
         )}
       </div>

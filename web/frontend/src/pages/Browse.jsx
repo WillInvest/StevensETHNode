@@ -76,6 +76,25 @@ export default function Browse() {
 
       {data && (
         <>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            <a
+              className="btn btn-ghost"
+              href={`/api/export/${schema}/${table}?format=csv`}
+              download
+              style={{ fontSize: 12, padding: "4px 12px", textDecoration: "none" }}
+            >
+              Export CSV
+            </a>
+            <a
+              className="btn btn-ghost"
+              href={`/api/export/${schema}/${table}?format=json`}
+              download
+              style={{ fontSize: 12, padding: "4px 12px", textDecoration: "none" }}
+            >
+              Export JSON
+            </a>
+          </div>
+
           <p style={{ color: "var(--text-secondary)", fontSize: 13, marginBottom: 16 }}>
             <span className="num">{data.total.toLocaleString()}</span> rows
             {" \u00b7 "}

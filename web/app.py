@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from web.db import get_pool, close_pool
-from web.routers import tables, browse, extraction, mempool, query, stats
+from web.routers import tables, browse, extraction, mempool, query, stats, export
 
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ app.include_router(extraction.router, prefix="/api")
 app.include_router(mempool.router, prefix="/api")
 app.include_router(query.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
+app.include_router(export.router, prefix="/api")
 
 
 @app.get("/api/health")
