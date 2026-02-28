@@ -11,12 +11,17 @@ from web.routers import sci as sci_router
 from web.routers import auth as auth_router
 from web.routers import monitoring
 from web.routers import fear_index
+from web.routers import eth_distribution
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await get_pool()
+    # Pre-warm ETH distribution cache and start background refresh
+    from web.routers.eth_distribution import start_background_refresh, stop_background_refresh
+    await start_background_refresh()
     yield
+    stop_background_refresh()
     await close_pool()
 
 
@@ -45,6 +50,7 @@ app.include_router(sci_router.router, prefix="/api")
 app.include_router(auth_router.router, prefix="/api")
 app.include_router(monitoring.router, prefix="/api")
 app.include_router(fear_index.router, prefix="/api")
+app.include_router(eth_distribution.router, prefix="/api")
 
 
 @app.get("/api/health")

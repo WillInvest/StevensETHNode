@@ -13,6 +13,7 @@ const SCI = lazy(() => import("./pages/SCI"));
 const FearIndex = lazy(() => import("./pages/FearIndex"));
 const StressTest = lazy(() => import("./pages/StressTest"));
 const Monitoring = lazy(() => import("./pages/Monitoring"));
+const EthDistribution = lazy(() => import("./pages/EthDistribution"));
 
 function PageLoader() {
   return (
@@ -86,6 +87,7 @@ export default function App() {
           <Route path="/fear-index" element={<FearIndex />} />
           <Route path="/stress-test" element={<StressTest />} />
           <Route path="/monitoring" element={<Monitoring />} />
+          <Route path="/eth-distribution" element={<EthDistribution />} />
         </Route>
       </Routes>
     </Suspense>

@@ -196,39 +196,54 @@ Q96 = 2**96
 def _tick_to_price(tick: int, decimals0: int, decimals1: int) -> float:
     """Convert a Uniswap V3 tick to a human-readable price.
 
-    The raw price from the tick formula is ``1.0001 ** tick`` which gives the
-    price of token0 denominated in token1 in their smallest units.  We adjust
-    by the decimal difference so the result is in "normal" units.
+    In Uniswap V3, ``1.0001 ** tick = token1_base / token0_base``.
+    To get the price of token1 in token0 (human units), e.g. ETH price
+    in USDC for a USDC/WETH pool:
 
-    Returns the price of token1 in terms of token0 (e.g. ETH price in USD for
-    an ETH/USDC pool where token0=USDC, token1=WETH).
+        price = 10**(decimals1 - decimals0) / (1.0001 ** tick)
+
+    Returns the price of token1 in terms of token0.
     """
-    raw_price = 1.0001**tick
-    # raw_price = token0 / token1 in base units
-    # Adjust for decimals: price_human = raw_price * 10**(decimals1 - decimals0)
-    decimal_adjustment = 10 ** (decimals1 - decimals0)
-    price_token0_per_token1 = raw_price * decimal_adjustment
-    # Invert to get the conventional quote: token1 price in token0 terms
-    # e.g. for USDC/WETH pool, this gives ETH price in USDC
-    if price_token0_per_token1 == 0:
+    raw_price = 1.0001**tick  # token1_base / token0_base
+    if raw_price == 0:
         return 0.0
-    return 1.0 / price_token0_per_token1
+    decimal_adjustment = 10 ** (decimals1 - decimals0)
+    return decimal_adjustment / raw_price
+
+
+def _price_to_tick(price: float, decimals0: int, decimals1: int) -> float:
+    """Convert a human-readable price to the corresponding Uniswap V3 tick.
+
+    Inverse of ``_tick_to_price``::
+
+        tick = log(10^(decimals1 - decimals0) / price) / log(1.0001)
+    """
+    if price <= 0:
+        return 0.0
+    decimal_adjustment = 10 ** (decimals1 - decimals0)
+    return math.log(decimal_adjustment / price) / math.log(1.0001)
 
 
 def _sqrt_price_to_price(
     sqrt_price_x96: int, decimals0: int, decimals1: int
 ) -> float:
-    """Convert sqrtPriceX96 to a human-readable price of token1 in token0."""
-    price_raw = (sqrt_price_x96 / Q96) ** 2
-    decimal_adjustment = 10 ** (decimals1 - decimals0)
-    price_token0_per_token1 = price_raw * decimal_adjustment
-    if price_token0_per_token1 == 0:
+    """Convert sqrtPriceX96 to a human-readable price of token1 in token0.
+
+    In Uniswap V3, ``(sqrtPriceX96 / 2**96)**2 = token1_base / token0_base``.
+    To get token1 price in token0 terms (e.g. ETH in USDC):
+
+        price = 10**(decimals1 - decimals0) / raw_price
+    """
+    price_raw = (sqrt_price_x96 / Q96) ** 2  # token1_base / token0_base
+    if price_raw == 0:
         return 0.0
-    return 1.0 / price_token0_per_token1
+    decimal_adjustment = 10 ** (decimals1 - decimals0)
+    return decimal_adjustment / price_raw
 
 
 def _get_initialized_ticks_from_bitmap(
-    contract, tick_spacing: int
+    contract, tick_spacing: int, *, w3: Web3 | None = None,
+    tick_range: tuple[int, int] | None = None,
 ) -> list[int]:
     """Scan the tick bitmap to find every initialized tick.
 
@@ -237,36 +252,82 @@ def _get_initialized_ticks_from_bitmap(
     the full word-position range implied by MIN_TICK / MAX_TICK, fetch each
     non-zero bitmap word, and decode the set bit positions into tick indices.
 
+    Uses batch RPC (web3.py 7.12+) when a Web3 instance is provided,
+    sending up to 200 tickBitmap calls per batch for ~10-50x speedup.
+
     Parameters
     ----------
     contract : web3 Contract
         Bound Uniswap V3 pool contract instance.
     tick_spacing : int
         The pool's tick spacing (e.g. 10 for 0.05%, 60 for 0.3%).
+    w3 : Web3 | None
+        Web3 instance for batch requests. Falls back to sequential if None.
+    tick_range : tuple[int, int] | None
+        Optional (min_tick, max_tick) to limit the bitmap scan.  When provided,
+        only word positions covering this range are fetched, dramatically
+        reducing RPC calls for narrow price windows.
 
     Returns
     -------
     list[int]
         Sorted list of every initialized tick index.
     """
-    # Compressed tick = tick / tick_spacing.  Word position = compressed >> 8.
-    min_word = math.floor(MIN_TICK / tick_spacing) >> 8
-    max_word = math.ceil(MAX_TICK / tick_spacing) >> 8
+    if tick_range is not None:
+        min_word = math.floor(tick_range[0] / tick_spacing) >> 8
+        max_word = math.ceil(tick_range[1] / tick_spacing) >> 8
+    else:
+        min_word = math.floor(MIN_TICK / tick_spacing) >> 8
+        max_word = math.ceil(MAX_TICK / tick_spacing) >> 8
 
+    all_word_positions = list(range(min_word, max_word + 1))
     initialized_ticks: list[int] = []
 
-    for word_pos in range(min_word, max_word + 1):
-        # int16 word position -- web3.py handles the signed conversion
-        bitmap: int = contract.functions.tickBitmap(word_pos).call()
-        if bitmap == 0:
-            continue
+    BITMAP_BATCH_SIZE = 200
 
-        for bit_pos in range(256):
-            if bitmap & (1 << bit_pos):
-                compressed = (word_pos << 8) + bit_pos
-                tick = compressed * tick_spacing
-                if MIN_TICK <= tick <= MAX_TICK:
-                    initialized_ticks.append(tick)
+    if w3 is not None and hasattr(w3, "batch_requests"):
+        # Batch RPC path
+        for batch_start in range(0, len(all_word_positions), BITMAP_BATCH_SIZE):
+            batch_words = all_word_positions[batch_start:batch_start + BITMAP_BATCH_SIZE]
+            try:
+                with w3.batch_requests() as batch:
+                    for wp in batch_words:
+                        batch.add(contract.functions.tickBitmap(wp))
+                    results = batch.execute()
+
+                for wp, bitmap in zip(batch_words, results):
+                    if bitmap == 0:
+                        continue
+                    for bit_pos in range(256):
+                        if bitmap & (1 << bit_pos):
+                            compressed = (wp << 8) + bit_pos
+                            tick = compressed * tick_spacing
+                            if MIN_TICK <= tick <= MAX_TICK:
+                                initialized_ticks.append(tick)
+            except Exception as exc:
+                logger.warning("Batch bitmap failed, falling back to sequential: %s", exc)
+                for wp in batch_words:
+                    bitmap = contract.functions.tickBitmap(wp).call()
+                    if bitmap == 0:
+                        continue
+                    for bit_pos in range(256):
+                        if bitmap & (1 << bit_pos):
+                            compressed = (wp << 8) + bit_pos
+                            tick = compressed * tick_spacing
+                            if MIN_TICK <= tick <= MAX_TICK:
+                                initialized_ticks.append(tick)
+    else:
+        # Sequential fallback (original behavior)
+        for word_pos in all_word_positions:
+            bitmap: int = contract.functions.tickBitmap(word_pos).call()
+            if bitmap == 0:
+                continue
+            for bit_pos in range(256):
+                if bitmap & (1 << bit_pos):
+                    compressed = (word_pos << 8) + bit_pos
+                    tick = compressed * tick_spacing
+                    if MIN_TICK <= tick <= MAX_TICK:
+                        initialized_ticks.append(tick)
 
     initialized_ticks.sort()
     return initialized_ticks
@@ -365,6 +426,7 @@ def get_tick_liquidity(
     rpc_url: str = DEFAULT_RPC_URL,
     *,
     block_identifier: str | int = "latest",
+    price_pct_range: float | None = None,
 ) -> pd.DataFrame:
     """Extract tick-level liquidity for a single Uniswap V3 pool.
 
@@ -456,9 +518,22 @@ def get_tick_liquidity(
     # ------------------------------------------------------------------
     # Step 2: Discover all initialized ticks via the bitmap
     # ------------------------------------------------------------------
-    logger.info("Scanning tick bitmap (this may take a moment) ...")
+    tick_range = None
+    if price_pct_range is not None and current_price > 0:
+        low_price = current_price * (1 - price_pct_range)
+        high_price = current_price * (1 + price_pct_range)
+        # Price is inversely related to tick: lower price → higher tick
+        tick_high = int(math.ceil(_price_to_tick(low_price, decimals0, decimals1)))
+        tick_low = int(math.floor(_price_to_tick(high_price, decimals0, decimals1)))
+        tick_range = (tick_low, tick_high)
+        logger.info(
+            "Price range $%.2f–$%.2f → tick range %d to %d",
+            low_price, high_price, tick_low, tick_high,
+        )
+
+    logger.info("Scanning tick bitmap%s ...", f" (filtered)" if tick_range else "")
     initialized_ticks = _get_initialized_ticks_from_bitmap(
-        contract, tick_spacing
+        contract, tick_spacing, w3=w3, tick_range=tick_range
     )
     logger.info("Found %d initialized ticks.", len(initialized_ticks))
 
@@ -480,19 +555,42 @@ def get_tick_liquidity(
     # ------------------------------------------------------------------
     logger.info("Fetching liquidityNet for %d ticks ...", len(initialized_ticks))
     tick_data: list[dict[str, Any]] = []
-    for t in initialized_ticks:
-        info = contract.functions.ticks(t).call(
-            block_identifier=block_identifier
-        )
-        liquidity_gross: int = info[0]
-        liquidity_net: int = info[1]
-        tick_data.append(
-            {
+    TICK_BATCH_SIZE = 100
+
+    if hasattr(w3, "batch_requests"):
+        # Batch RPC path
+        for batch_start in range(0, len(initialized_ticks), TICK_BATCH_SIZE):
+            batch_ticks = initialized_ticks[batch_start:batch_start + TICK_BATCH_SIZE]
+            try:
+                with w3.batch_requests() as batch:
+                    for t in batch_ticks:
+                        batch.add(contract.functions.ticks(t))
+                    results = batch.execute()
+
+                for t, info in zip(batch_ticks, results):
+                    tick_data.append({
+                        "tick": t,
+                        "liquidity_gross": info[0],
+                        "liquidity_net": info[1],
+                    })
+            except Exception as exc:
+                logger.warning("Batch ticks failed, falling back to sequential: %s", exc)
+                for t in batch_ticks:
+                    info = contract.functions.ticks(t).call(block_identifier=block_identifier)
+                    tick_data.append({
+                        "tick": t,
+                        "liquidity_gross": info[0],
+                        "liquidity_net": info[1],
+                    })
+    else:
+        # Sequential fallback
+        for t in initialized_ticks:
+            info = contract.functions.ticks(t).call(block_identifier=block_identifier)
+            tick_data.append({
                 "tick": t,
-                "liquidity_gross": liquidity_gross,
-                "liquidity_net": liquidity_net,
-            }
-        )
+                "liquidity_gross": info[0],
+                "liquidity_net": info[1],
+            })
 
     # ------------------------------------------------------------------
     # Step 4: Reconstruct cumulative liquidity
@@ -511,7 +609,21 @@ def get_tick_liquidity(
     # reported liquidity().
     # ------------------------------------------------------------------
     logger.info("Reconstructing cumulative liquidity ...")
-    cumulative_liquidity = 0
+
+    # When scanning a subrange, we don't have ticks below the range so
+    # cumulative starting from 0 would be wrong.  Use pool.liquidity()
+    # (the active liquidity at the current tick) to compute the correct
+    # starting offset.
+    starting_liquidity = 0
+    if tick_range is not None:
+        partial_sum = sum(
+            entry["liquidity_net"]
+            for entry in tick_data
+            if entry["tick"] <= current_tick
+        )
+        starting_liquidity = current_liquidity - partial_sum
+
+    cumulative_liquidity = starting_liquidity
     rows: list[dict[str, Any]] = []
 
     # Fetch ETH price for USD estimates

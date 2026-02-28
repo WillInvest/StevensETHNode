@@ -8,6 +8,7 @@ const navItems = [
   { to: "/query", label: "Query", icon: "⌘" },
   { to: "/sci", label: "SCI", icon: "◆" },
   { to: "/fear-index", label: "Fear Index", icon: "⚡" },
+  { to: "/eth-distribution", label: "ETH Dist", icon: "▦" },
   { to: "/monitoring", label: "Monitor", icon: "◎" },
 ];
 
