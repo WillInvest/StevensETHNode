@@ -14,8 +14,14 @@ Extracts blockchain data → PostgreSQL → web dashboard.
 
 ## Key Paths
 - `shovel/config.json` — Shovel declarative indexer config (add protocols here)
-- `web/app.py` — FastAPI entry point
-- `web/frontend/src/` — React source
+- `web/app.py` — FastAPI entry point (12 routers + WebSocket)
+- `web/routers/fear_index.py` — Fear Index API endpoints
+- `web/frontend/src/` — React source (11 pages with lazy loading)
+- `backend/app/services/` — CFI computation pipeline (probability, impact, cascade, fear_index)
+- `backend/app/services/indicators/` — 6 supplementary indicators
+- `protocols-live-state/` — Protocol-specific extractors (Uniswap V3, Aave V3, Maker, Hyperliquid)
+- `analysis/validation/` — Backtesting framework (targets, LASSO, Granger, event validation, benchmarks)
+- `indexing/cryo/scripts/` — Cryo historical extraction scripts
 - `scripts/backfill.sh` — Cryo historical extraction commands
 - `scripts/load_parquet.sh` — DuckDB Parquet → PostgreSQL loader
 - `db/schema/` — SQL schema files
@@ -64,3 +70,11 @@ bash scripts/load_parquet.sh
 - Use subagents for isolated tasks (security review, test running, research)
 - Use `/compact` between unrelated tasks to keep context clean
 - Check `.claude/rules/` for file-type-specific conventions
+
+## Available Plugin Skills
+Use these skills proactively when working on related tasks:
+- **`frontend-design:frontend-design`** — For building/polishing frontend UI components and pages
+- **`agents-blockchain-web3:blockchain-developer`** — For smart contract interaction, DeFi protocol integration, Web3 development
+- **`superpowers:brainstorming`** — Before any creative/feature work
+- **`superpowers:systematic-debugging`** — For debugging and test failures
+- **`superpowers:verification-before-completion`** — Before claiming work is done

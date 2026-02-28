@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import useSSE from "../useSSE";
 
 function formatDuration(seconds) {
@@ -34,6 +34,28 @@ export default function Extraction() {
   }, []);
 
   const jobs = sseData?.jobs || [];
+
+  // Refresh pool data (coverage) when a job finishes
+  const prevJobStatuses = useRef({});
+  useEffect(() => {
+    const current = {};
+    for (const j of jobs) {
+      current[j.job_id] = j.status;
+    }
+    const needsRefresh = jobs.some(
+      (j) =>
+        j.status === "completed" &&
+        prevJobStatuses.current[j.job_id] &&
+        prevJobStatuses.current[j.job_id] !== "completed"
+    );
+    prevJobStatuses.current = current;
+    if (needsRefresh) {
+      fetch("/api/extraction/pools")
+        .then((r) => r.ok && r.json())
+        .then((d) => d && setPools(d.pools))
+        .catch(() => {});
+    }
+  }, [jobs]);
 
   const jobForPool = useCallback(
     (poolId) => {
@@ -109,7 +131,8 @@ export default function Extraction() {
           const job = jobForPool(pool.pool_id);
           const isRunning = job?.status === "running";
           const isPaused = job?.status === "paused";
-          const isActive = isRunning || isPaused;
+          const isLoading = job?.status === "loading_to_db";
+          const isActive = isRunning || isPaused || isLoading;
           const canStart = !isActive && starting !== pool.pool_id;
 
           return (
@@ -125,11 +148,47 @@ export default function Extraction() {
               }}>
                 {pool.contract}
               </div>
-              <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 16 }}>
+              <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 8 }}>
                 Deploy block: <span className="num">{formatNum(pool.deploy_block)}</span>
                 {" | "}
                 Total blocks: <span className="num">{formatNum(pool.total_blocks)}</span>
               </div>
+
+              {/* DB Coverage indicator */}
+              {pool.db_row_count > 0 ? (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+                    DB coverage: block{" "}
+                    <span className="num">{formatNum(pool.db_min_block)}</span>
+                    {" — "}
+                    <span className="num">{formatNum(pool.db_max_block)}</span>
+                    {" ("}
+                    <span className="num">{formatNum(pool.db_row_count)}</span>
+                    {" rows)"}
+                  </div>
+                  <div style={{
+                    height: 4,
+                    borderRadius: 2,
+                    background: "var(--border)",
+                    overflow: "hidden",
+                  }}>
+                    <div style={{
+                      height: "100%",
+                      width: `${Math.min(pool.coverage_pct, 100)}%`,
+                      background: "var(--green, #22c55e)",
+                      borderRadius: 2,
+                      transition: "width 0.3s ease",
+                    }} />
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
+                    {pool.coverage_pct}% of block range covered
+                  </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>
+                  No data in database yet
+                </div>
+              )}
 
               <div style={{ display: "flex", gap: 8 }}>
                 {!isActive && (
@@ -203,6 +262,28 @@ export default function Extraction() {
                       </>
                     )}
                   </div>
+                  {job.status === "loading_to_db" && (
+                    <div style={{
+                      fontSize: 13,
+                      color: "var(--indigo, #6366f1)",
+                      marginTop: 8,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}>
+                      <span className="status-dot connected" style={{ animation: "pulse 1.5s infinite" }} />
+                      Loading to database...
+                    </div>
+                  )}
+                  {job.loaded_rows != null && job.status === "completed" && (
+                    <div style={{
+                      fontSize: 13,
+                      color: "var(--green, #22c55e)",
+                      marginTop: 8,
+                    }}>
+                      Loaded <span className="num">{formatNum(job.loaded_rows)}</span> rows into database
+                    </div>
+                  )}
                   {job.error_message && (
                     <div style={{ color: "var(--red)", fontSize: 13, marginTop: 8 }}>
                       {job.error_message}

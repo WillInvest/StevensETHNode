@@ -38,8 +38,8 @@ async def monitoring_status():
 
         # Table sizes
         cur = await conn.execute("""
-            SELECT schemaname, tablename, n_live_tup,
-                   pg_total_relation_size(quote_ident(schemaname) || '.' || quote_ident(tablename)) AS size_bytes
+            SELECT schemaname, relname, n_live_tup,
+                   pg_total_relation_size(quote_ident(schemaname) || '.' || quote_ident(relname)) AS size_bytes
             FROM pg_stat_user_tables
             ORDER BY n_live_tup DESC
         """)
@@ -53,9 +53,12 @@ async def monitoring_status():
             })
 
         # Get latest indexed block
-        cur = await conn.execute("SELECT MAX(block_num) FROM uniswap_v3_swaps")
-        row = await cur.fetchone()
-        latest_indexed = int(row[0]) if row and row[0] else 0
+        try:
+            cur = await conn.execute("SELECT MAX(block) FROM uniswap_v3.swap_events")
+            row = await cur.fetchone()
+            latest_indexed = int(row[0]) if row and row[0] else 0
+        except Exception:
+            latest_indexed = 0
 
     # Erigon health
     chain_head = _rpc_call("eth_blockNumber")

@@ -15,6 +15,7 @@ from web.extraction import (
     resume_extraction,
     get_job_progress,
     get_all_jobs,
+    get_pool_coverage,
     _jobs,
 )
 
@@ -23,10 +24,11 @@ router = APIRouter(tags=["extraction"])
 
 @router.get("/extraction/pools")
 async def list_pools():
-    """List supported pools with chain head info."""
+    """List supported pools with chain head info and DB coverage."""
     head = await get_chain_head()
     pools = []
     for pool_id, info in POOLS.items():
+        coverage = await get_pool_coverage(pool_id)
         pools.append({
             "pool_id": pool_id,
             "label": info["label"],
@@ -34,8 +36,18 @@ async def list_pools():
             "deploy_block": info["deploy_block"],
             "chain_head": head,
             "total_blocks": head - info["deploy_block"],
+            **coverage,
         })
     return {"pools": pools, "chain_head": head}
+
+
+@router.get("/extraction/coverage")
+async def coverage():
+    """Get DB coverage stats for all pools."""
+    result = {}
+    for pool_id in POOLS:
+        result[pool_id] = await get_pool_coverage(pool_id)
+    return {"coverage": result}
 
 
 class StartRequest(BaseModel):

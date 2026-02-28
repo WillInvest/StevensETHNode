@@ -31,7 +31,7 @@ def _z_to_score(z):
 async def _get_latest_block():
     async with get_conn() as conn:
         cur = await conn.execute(
-            "SELECT MAX(block_num) FROM uniswap_v3_swaps"
+            "SELECT MAX(block) FROM uniswap_v3.swap_events"
         )
         row = await cur.fetchone()
         return row[0] if row and row[0] else 0
@@ -47,16 +47,16 @@ async def _safe_query(conn, sql, params=None):
         return 0.0
 
 
-async def _get_30d_stats(conn, table, column, current_block):
+async def _get_30d_stats(conn, table, block_col, current_block):
     """Get 30-day rolling mean and std for normalization."""
     blocks_30d = 30 * 24 * 300  # ~30 days of blocks
     start = current_block - blocks_30d
     # Sample hourly windows for efficiency
     sql = f"""
         SELECT AVG(cnt), STDDEV(cnt) FROM (
-            SELECT (block_num / {WINDOW_BLOCKS}) AS bucket, COUNT(*) AS cnt
+            SELECT ({block_col} / {WINDOW_BLOCKS}) AS bucket, COUNT(*) AS cnt
             FROM {table}
-            WHERE block_num > %s
+            WHERE {block_col} > %s
             GROUP BY bucket
         ) AS buckets
     """
@@ -74,10 +74,10 @@ async def compute_dex_score(conn, block_num):
     start = block_num - WINDOW_BLOCKS
     count = await _safe_query(
         conn,
-        "SELECT COUNT(*) FROM uniswap_v3_swaps WHERE block_num BETWEEN %s AND %s",
+        "SELECT COUNT(*) FROM uniswap_v3.swap_events WHERE block BETWEEN %s AND %s",
         (start, block_num),
     )
-    mean, std = await _get_30d_stats(conn, "uniswap_v3_swaps", "block_num", block_num)
+    mean, std = await _get_30d_stats(conn, "uniswap_v3.swap_events", "block", block_num)
     z = (count - mean) / std if std > 0 else 0
     return _z_to_score(z), {"swap_count": count, "mean_30d": mean, "std_30d": std}
 
@@ -119,11 +119,11 @@ async def compute_gas_score(conn, block_num):
     start = block_num - WINDOW_BLOCKS
     count = await _safe_query(
         conn,
-        "SELECT COUNT(*) FROM uniswap_v3_swaps WHERE block_num BETWEEN %s AND %s",
+        "SELECT COUNT(*) FROM uniswap_v3.swap_events WHERE block BETWEEN %s AND %s",
         (start, block_num),
     )
     # Proxy: tx density indicates gas demand
-    mean, std = await _get_30d_stats(conn, "uniswap_v3_swaps", "block_num", block_num)
+    mean, std = await _get_30d_stats(conn, "uniswap_v3.swap_events", "block", block_num)
     z = (count - mean) / std if std > 0 else 0
     return _z_to_score(z * 0.8), {"tx_density": count}
 
