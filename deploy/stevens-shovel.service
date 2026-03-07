@@ -1,0 +1,15 @@
+[Unit]
+Description=Stevens Blockchain Shovel Indexer
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=hfu11
+WorkingDirectory=/home/hfu11/stevens-blockchain
+Environment=ETHNODE_DATABASE_URL=postgres://ethnode:changeme@localhost:5432/ethnode
+ExecStart=/usr/local/bin/shovel -config shovel/config.json
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=Stevens Blockchain Analytics API
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=hfu11
+WorkingDirectory=/home/hfu11/stevens-blockchain
+Environment=ETHNODE_DATABASE_URL=postgres://ethnode:changeme@localhost:5432/ethnode
+Environment=JWT_SECRET=change-this-in-production
+ExecStart=/usr/bin/python3 -m uvicorn web.app:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
