@@ -2,22 +2,23 @@ import { NavLink } from "react-router-dom";
 import { PROTOCOL_REGISTRY } from "../../config/protocolRegistry";
 
 const cardStyle = {
-  background: "var(--bg-card)",
-  border: "1px solid var(--border-subtle)",
+  background: "var(--glass-bg)",
+  backdropFilter: "var(--glass-blur)",
+  border: "1px solid var(--border)",
   borderRadius: 12,
   padding: "20px 24px",
   textDecoration: "none",
   display: "block",
-  transition: "border-color var(--transition-fast), background var(--transition-fast)",
+  transition: "border-color var(--transition), background var(--transition), box-shadow var(--transition)",
 };
 
 export default function ExploreHome() {
   return (
     <div style={{ padding: "32px 36px", maxWidth: 800 }}>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", marginBottom: 6 }}>
+      <h1 style={{ fontSize: 28, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8, letterSpacing: "-0.01em" }}>
         Explore Protocols
       </h1>
-      <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 32 }}>
+      <p style={{ fontSize: 14, color: "var(--text-secondary)", marginBottom: 32 }}>
         Browse on-chain data indexed from Ethereum mainnet.
       </p>
 
@@ -52,15 +53,15 @@ export default function ExploreHome() {
               to={`/explore/${cat.id}`}
               style={({ isActive }) => ({
                 ...cardStyle,
-                borderColor: isActive ? "var(--stevens-primary)" : "var(--border-subtle)",
+                borderColor: isActive ? "var(--border-accent)" : "var(--border)",
               })}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "var(--stevens-primary)";
-                e.currentTarget.style.background = "var(--bg-card-hover)";
+                e.currentTarget.style.borderColor = "var(--border-accent)";
+                e.currentTarget.style.boxShadow = "var(--accent-glow)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "var(--border-subtle)";
-                e.currentTarget.style.background = "var(--bg-card)";
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.boxShadow = "none";
               }}
             >
               <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>

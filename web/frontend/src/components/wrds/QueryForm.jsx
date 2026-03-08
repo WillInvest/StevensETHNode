@@ -136,14 +136,14 @@ export default function QueryForm({ dataset, onOpenInSQLEditor }) {
             )}
           </div>
           <pre style={{
-            background: "var(--surface-code)",
+            background: "rgba(255,255,255,0.03)",
             padding: 12,
             borderRadius: "var(--radius-sm)",
             fontSize: 12,
             fontFamily: "var(--font-mono)",
             overflowX: "auto",
             margin: 0,
-            color: "var(--text)",
+            color: "var(--text-primary)",
           }}>
             {generatedSQL}
           </pre>

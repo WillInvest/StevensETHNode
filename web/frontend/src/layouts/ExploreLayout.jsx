@@ -126,6 +126,41 @@ export default function ExploreLayout({ user, onLogout }) {
           top: 48,
           height: "calc(100vh - 48px)",
         }}>
+          {/* Query Builder link */}
+          <div style={{ padding: "12px 12px 4px" }}>
+            <NavLink
+              to="/explore/query"
+              style={({ isActive }) => ({
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 12px",
+                borderRadius: 6,
+                fontSize: 13,
+                fontWeight: 500,
+                textDecoration: "none",
+                color: isActive ? "#fff" : "var(--sidebar-text)",
+                background: isActive ? "rgba(0, 212, 255, 0.15)" : "transparent",
+                transition: "all var(--transition-fast)",
+                border: isActive ? "1px solid rgba(0, 212, 255, 0.3)" : "1px solid transparent",
+                cursor: "pointer",
+              })}
+              onMouseEnter={(e) => {
+                if (e.currentTarget.style.background === "transparent") {
+                  e.currentTarget.style.background = "rgba(0, 212, 255, 0.08)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.currentTarget.getAttribute("aria-current")) {
+                  e.currentTarget.style.background = "transparent";
+                }
+              }}
+            >
+              <span style={{ fontSize: 14 }}>⚙️</span>
+              <span>Query Builder</span>
+            </NavLink>
+          </div>
+
           {/* Sidebar heading */}
           <div style={{
             padding: "14px 16px 8px",

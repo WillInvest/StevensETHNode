@@ -38,7 +38,7 @@ const styles = {
     color: "var(--sidebar-text)",
     userSelect: "none",
     borderRadius: 6,
-    transition: "background var(--transition-fast)",
+    transition: "background var(--transition-fast), color var(--transition-fast)",
   },
   versionHeader: {
     display: "flex",
@@ -51,7 +51,7 @@ const styles = {
     color: "var(--sidebar-text)",
     userSelect: "none",
     borderRadius: 6,
-    transition: "background var(--transition-fast)",
+    transition: "background var(--transition-fast), color var(--transition-fast)",
   },
   poolLink: {
     display: "block",

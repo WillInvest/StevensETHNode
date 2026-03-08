@@ -78,6 +78,7 @@ const StressTest = lazy(() => import("./pages/StressTest"));
 const Monitoring = lazy(() => import("./pages/Monitoring"));
 const EthDistribution = lazy(() => import("./pages/EthDistribution"));
 const ExploreHome = lazy(() => import("./pages/explore/ExploreHome"));
+const QueryBuilder = lazy(() => import("./pages/explore/QueryBuilder"));
 const PoolView = lazy(() => import("./pages/explore/PoolView"));
 
 function PageLoader() {
@@ -145,6 +146,7 @@ export default function App() {
           {/* Explore section — uses ExploreLayout with sidebar */}
           <Route element={<ExploreLayout user={user} onLogout={() => setUser(null)} />}>
             <Route path="/explore" element={<ExploreHome />} />
+            <Route path="/explore/query" element={<QueryBuilder />} />
             <Route path="/explore/dex/uniswap/v3/:poolAddress" element={<PoolView />} />
           </Route>
 
